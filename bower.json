@@ -1,0 +1,31 @@
+{
+  "name": "ObeyTheBoard",
+  "version": "0.0.1",
+  "homepage": "https://github.com/Fongas/ObeyTheBoard",
+  "authors": [
+    "Torsten Zwoch <tz@susdv.de>"
+  ],
+  "description": "Copyright by Fongas",
+  "keywords": [
+    "Kanban",
+    "Board",
+    "Management",
+    "Board",
+    "ToDos",
+    "Planning",
+    "Board"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "angular": "~1.4.3",
+    "angularLocalStorage": "~0.3.0",
+    "angular-sortable-view": "~0.0.13",
+    "angular-local-storage": "~0.2.2",
+    "jquery": "~2.1.4",
+    "angular-route": "~1.4.3",
+    "angular-sanitize": "~1.4.3",
+    "angular-nl2br": "~1.0.3",
+    "bootstrap": "~3.3.5",
+    "components-font-awesome": "~4.3.0"
+  }
+}
