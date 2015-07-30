@@ -2,8 +2,8 @@
 <head>
     <meta charset="utf8"/>
     <title>AngularJS Tutorial</title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bower_components/components-font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="github_project_issues.css">
     <script type="application/javascript">
         var baseUrlComplete = "";
@@ -192,7 +192,6 @@
             vertical-align: middle;
         }
 
-
         .placeholder-left, .placeholder-right {
             width: 100%;
             height: 38px;
@@ -207,182 +206,225 @@
     </style>
 </head>
 <body>
-
-
 <div class="widget-body" ng-controller="GithubProjectIssuesCtrl" id="GithubProjectIssuesCtrl">
-    <div class="container">
+    <div class="">
         <div class="row">
             <form class="form-inline padding-bottom-40">
-                <div class="form-group">
-                    <label for="repo">Name</label>
-                    <input type="text" class="form-control" id="name" placeholder="Name"
-                           ng-model="github.name">
-                </div>
                 <div class="form-group">
                     <label for="token">Github Token</label>
                     <input type="text" class="form-control" id="token" placeholder="Token" ng-model="github.token">
                 </div>
-                <div class="form-group">
-                    <label for="repo">Repository</label>
-                    <input type="text" class="form-control" id="repo" placeholder="User/Repository"
-                           ng-model="github.url">
-                </div>
-                <button type="submit" class="btn btn-default" ng-click="addRepository()">Hinzufügen</button>
-                <button type="submit" class="btn btn-default" ng-click="addColumn()">Spalte hinzufügen</button>
-                <button type="submit" class="btn btn-default" ng-click="toggleEditable()">Spalten bearbeiten</button>
-            </form> <a class="btn btn-primary" role="button" data-toggle="collapse" ng-click="toggleRepo()">
-            Link with href
+                <button type="submit" class="btn btn-default" ng-click="addUser(github.token)">Benutzer hinzufügen
+                </button>
+                <button type="submit" class="btn btn-default" ng-click="loadUserRepos()">loadUserRepos</button>
+            </form>
+        </div>
+        <a class="btn btn-primary" role="button" data-toggle="collapse" ng-click="toggleAllUserRepos()">
+            <span ng-show="!showAllUserRepos">Alle Benutzer mit Repos einblenden</span><span ng-show="showAllUserRepos">Alle Benutzer mit Repos ausblenden</span>
         </a>
-        </div>
-        <hr/>
-        <div class="row" ng-show="showRepo">
-            <div class="multi-multi-sortable" ng-repeat="repo in repos track by $index">
-                <div class="sortable-container col-xs-3 column block" sv-root="multiple_{{$odd}}" sv-part="repo.issues" sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
-                    <div class="row">
-                        <div class="col-xs-9"><h1>[[repo.name]] ([[repo.issues.length]])</h1></div>
-                        <div class="col-xs-3"><a href="#" ng-click="deleteRepository(repo, $index)"><i class="fa fa-trash-o"></i></a></div>
-                    </div>
-                    <div ng-repeat="item in repo.issues track by $index" sv-element class="multi panel bs-callout bs-callout-warning card">
-                        <div class="row">
-                            <div class="col-xs-9">
-                                <h1>[[item.title]]</h1>
-                                <p>
-                                    <a href="[[item.html_url]]"
-                                       target="_blank" class="transicion" title="Ticket [[item.number]]" alt="Ticket [[item.number]]"> <i class="fa fa-github"></i></a>
-                                    <a href="[[item.html_url]]"
-                                       target="_blank" class="transicion" title="[[item.comments]] Kommentare" alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
-                                    <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
-                                    <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
-                                    [[item.milestone.title]]<br><br>
-                                    <span class="label label-default" style="background-color: [[label.color]];" ng-repeat="label in item.labels track by $index">[[label.name]]</span>
-                                </p>
-                            </div>
-                            <div class="col-xs-3"><a href="[[item.assignee.html_url]]" target="_blank"><img src="[[item.assignee.avatar_url]]" ng-show="item.assignee" class="user-photo" title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <hr/>
 
-        <div class="row">
-            <div class="multi-multi-sortable" ng-repeat="column in board.columns track by $index">
-                <div class="sortable-container col-xs-2 block head bg-dot20" sv-root="multiple_{{$odd}}" sv-part="column.issues" sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
-                    <div ng-show="editMode"><input ng-model="column.name" value="[[column.name]]"/> [[column.issues.length]]</div>
-                    <div ng-hide="editMode">[[column.name]] ([[column.issues.length]])</div>
-                    <div class="side pull-right">
-                        <ul class="buttons">
-                            <li><a href="#"><span class="icon-cogs"></span></a></li>
+        <div class="row" ng-show="showAllUserRepos">
+            <div class="col-md-3" ng-repeat="user in users track by $index">
+                <div class="row">
+                    <div class="col-md-12">
+                        <span>Benutzer: [[user.user.login]]</span><br>
+                        <span>Repos:</span>
+                        <ul>
+                            <li ng-repeat="repo in user.repos track by $index">
+                                [[repo.name]]
+                                <button class="btn btn-default"
+                                        ng-click="addRepository(repo.name,repo.full_name,user.token,user.type)">
+                                    Hinzufügen
+                                </button>
+                            </li>
                         </ul>
                     </div>
-                    <div ng-repeat="item in column.issues" sv-element class="multi panel bs-callout bs-callout-warning card">
-                        <div class="row">
-                            <div class="col-xs-9">
-                                <h1>[[item.title]]</h1>
-                                <p>
-                                    <a href="[[item.html_url]]"
-                                       target="_blank" class="transicion" title="Ticket [[item.number]]" alt="Ticket [[item.number]]"> <i class="fa fa-github"></i></a>
-                                    <a href="[[item.html_url]]"
-                                       target="_blank" class="transicion" title="[[item.comments]] Kommentare" alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
-                                    <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
-                                    <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
-                                    [[item.milestone.title]]<br><br>
-                                    <span class="label label-default" style="background-color: [[label.color]];" ng-repeat="label in item.labels track by $index">[[label.name]]</span>
-                                </p>
-                            </div>
-                            <div class="col-xs-3"><a href="[[item.assignee.html_url]]" target="_blank"><img src="[[item.assignee.avatar_url]]" ng-show="item.assignee" class="user-photo" title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr/>
+
+
+    <a class="btn btn-primary" role="button" data-toggle="collapse" ng-click="toggleRepo()">
+        <span ng-show="!showRepo">Repos einblenden</span><span ng-show="showRepo">Repos ausblenden</span>
+    </a>
+
+    <div class="row" ng-show="showRepo">
+        <div class="multi-multi-sortable" ng-repeat="repo in repos track by $index">
+            <div class="sortable-container col-xs-3 column block" sv-root="multiple_{{$odd}}" sv-part="repo.issues"
+                 sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
+                <div class="row">
+                    <div class="col-xs-9"><h1>[[repo.name]] ([[repo.issues.length]])</h1></div>
+                    <div class="col-xs-3"><a href="#" ng-click="deleteRepository(repo, $index)"><i
+                            class="fa fa-trash-o"></i></a></div>
+                </div>
+                <div ng-repeat="item in repo.issues track by $index" sv-element
+                     class="multi panel bs-callout bs-callout-warning card">
+                    <div class="row">
+                        <div class="col-xs-9">
+                            <h1>[[item.title]]</h1>
+
+                            <p>
+                                <a href="[[item.html_url]]"
+                                   target="_blank" class="transicion" title="Ticket [[item.number]]"
+                                   alt="Ticket [[item.number]]"> <i class="fa fa-github"></i></a>
+                                <a href="[[item.html_url]]"
+                                   target="_blank" class="transicion" title="[[item.comments]] Kommentare"
+                                   alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
+                                <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
+                                <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
+                                [[item.milestone.title]]<br><br>
+                                    <span class="label label-default" style="background-color: [[label.color]];"
+                                          ng-repeat="label in item.labels track by $index">[[label.name]]</span>
+                            </p>
                         </div>
+                        <div class="col-xs-3"><a href="[[item.assignee.html_url]]" target="_blank"><img
+                                src="[[item.assignee.avatar_url]]" ng-show="item.assignee" class="user-photo"
+                                title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    <hr/>
 
-        <div class="row" ng-show="false">
-            <div sv-root class="multi-sortable">
-                <div class="sortable-container col-xs-2" sv-part="repositories[0].issues">
-                    <div ng-repeat="item in repositories[0].issues" sv-element class="well multi">
-                        [[item.title]]
-                    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary btn-lg pull-right" ng-click="toggleEditable()">Spalten bearbeiten</button>
+                <button type="button" class="btn btn-primary btn-lg pull-right" ng-click="addColumn()">Spalte hinzufügen</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="multi-multi-sortable" ng-repeat="column in board.columns track by $index">
+            <div class="sortable-container col-xs-2 block head bg-dot20" sv-root="multiple_{{$odd}}"
+                 sv-part="column.issues" sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
+                <div ng-show="editMode"><input ng-model="column.name" value="[[column.name]]"/>
+                    [[column.issues.length]]
                 </div>
-                <div class="sortable-container col-xs-2" sv-part="repositories[1].issues">
-                    <div ng-repeat="item in repositories[1].issues" sv-element class="well multi">
-                        [[item.title]]
+                <div ng-hide="editMode">[[column.name]] ([[column.issues.length]])</div>
+                <div class="side pull-right">
+                    <ul class="buttons">
+                        <li><a href="#"><span class="icon-cogs"></span></a></li>
+                    </ul>
+                </div>
+                <div ng-repeat="item in column.issues" sv-element
+                     class="multi panel bs-callout bs-callout-warning card">
+                    <div class="row">
+                        <div class="col-xs-9">
+                            <h1>[[item.title]]</h1>
+
+                            <p>
+                                <a href="[[item.html_url]]"
+                                   target="_blank" class="transicion" title="Ticket [[item.number]]"
+                                   alt="Ticket [[item.number]]"> <i class="fa fa-github"></i></a>
+                                <a href="[[item.html_url]]"
+                                   target="_blank" class="transicion" title="[[item.comments]] Kommentare"
+                                   alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
+                                <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
+                                <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
+                                [[item.milestone.title]]<br><br>
+                                    <span class="label label-default" style="background-color: [[label.color]];"
+                                          ng-repeat="label in item.labels track by $index">[[label.name]]</span>
+                            </p>
+                        </div>
+                        <div class="col-xs-3"><a href="[[item.assignee.html_url]]" target="_blank"><img
+                                src="[[item.assignee.avatar_url]]" ng-show="item.assignee" class="user-photo"
+                                title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row" ng-show="false">
-            <div class="tabbable">
-                <ul class="nav nav-tabs padding-12 tab-color-blue background-blue" id="myTab4">
-                    <li class="[[repository.activeState]]" ng-repeat="repository in repositories">
-                        <a data-toggle="tab" href="#[[repository.url]]" aria-expanded="false">[[repository.url]]</a>
-                    </li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane [[repository.activeState]]" id="[[repository.url]]"
-                         ng-repeat="repository in repositories">
-                        <div sv-root sv-part="repository.issues"
-                             style="background: #0000ff;margin: 5px; border:1px solid #111;">
-                            <div ng-repeat="item in repository.issues" sv-element>
-                                <div>[[item.title]]</div>
-                            </div>
-                        </div>
+    </div>
 
-                        <div sv-root sv-part="repository.issues2"
-                             style="background: #0000ff;margin: 5px; border:1px solid #111;">
-                            <div ng-repeat="item in repository.issues2" sv-element>
-                                <div>[[item.title]]</div>
-                            </div>
+    <div class="row" ng-show="false">
+        <div sv-root class="multi-sortable">
+            <div class="sortable-container col-xs-2" sv-part="repositories[0].issues">
+                <div ng-repeat="item in repositories[0].issues" sv-element class="well multi">
+                    [[item.title]]
+                </div>
+            </div>
+            <div class="sortable-container col-xs-2" sv-part="repositories[1].issues">
+                <div ng-repeat="item in repositories[1].issues" sv-element class="well multi">
+                    [[item.title]]
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-show="false">
+        <div class="tabbable">
+            <ul class="nav nav-tabs padding-12 tab-color-blue background-blue" id="myTab4">
+                <li class="[[repository.activeState]]" ng-repeat="repository in repositories">
+                    <a data-toggle="tab" href="#[[repository.url]]" aria-expanded="false">[[repository.url]]</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane [[repository.activeState]]" id="[[repository.url]]"
+                     ng-repeat="repository in repositories">
+                    <div sv-root sv-part="repository.issues"
+                         style="background: #0000ff;margin: 5px; border:1px solid #111;">
+                        <div ng-repeat="item in repository.issues" sv-element>
+                            <div>[[item.title]]</div>
                         </div>
-                        <div ng-repeat="issue in repository.issues">
-                            <article class="post">
-                                <div class="panel panel-default">
-                                    <div class="panel-body">
-                                        <h3 class="issue-title"><i class="fa fa-github"></i><a
-                                                href="https://github.com/Mittelstandssoftware/VisionFlow/issues"
-                                                class="transicion"> [[issue.title]]</a></h3>
+                    </div>
 
-                                        <div class="row">
-                                            <div class="col-md-10 post-content">
-                                                <p ng-bind-html="issue.body | nl2br"></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="panel-footer issue-info">
-                                        <div class="row">
-                                            <div class="col-lg-10 col-md-9 col-sm-8">
-                                                <i class="fa fa-clock-o"></i> [[issue.created_at | date: 'dd.MM.yyyy']]
-                                                <i class="fa fa-edit"> </i>[[issue.updated_at | date: 'dd.MM.yyyy']]
-                                                <i class="fa fa-user"> </i>[[issue.user.login]]
-                                            </div>
-                                            <div class="col-lg-2 col-md-3 col-sm-4">
-                                                <a href="https://github.com/Mittelstandssoftware/VisionFlow/issues"
-                                                   class="pull-right">Zum Ticket &raquo;</a>
-                                            </div>
+                    <div sv-root sv-part="repository.issues2"
+                         style="background: #0000ff;margin: 5px; border:1px solid #111;">
+                        <div ng-repeat="item in repository.issues2" sv-element>
+                            <div>[[item.title]]</div>
+                        </div>
+                    </div>
+                    <div ng-repeat="issue in repository.issues">
+                        <article class="post">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <h3 class="issue-title"><i class="fa fa-github"></i><a
+                                            href="https://github.com/Mittelstandssoftware/VisionFlow/issues"
+                                            class="transicion"> [[issue.title]]</a></h3>
+
+                                    <div class="row">
+                                        <div class="col-md-10 post-content">
+                                            <p ng-bind-html="issue.body | nl2br"></p>
                                         </div>
                                     </div>
                                 </div>
-                            </article>
-                        </div>
+                                <div class="panel-footer issue-info">
+                                    <div class="row">
+                                        <div class="col-lg-10 col-md-9 col-sm-8">
+                                            <i class="fa fa-clock-o"></i> [[issue.created_at | date: 'dd.MM.yyyy']]
+                                            <i class="fa fa-edit"> </i>[[issue.updated_at | date: 'dd.MM.yyyy']]
+                                            <i class="fa fa-user"> </i>[[issue.user.login]]
+                                        </div>
+                                        <div class="col-lg-2 col-md-3 col-sm-4">
+                                            <a href="https://github.com/Mittelstandssoftware/VisionFlow/issues"
+                                               class="pull-right">Zum Ticket &raquo;</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+</div>
 
 
-
-
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
-<script src="angular-route.js"></script>
-<script src="angular-sanitize.min.js"></script>
-<script src="angular-nl2br.min.js"></script>
-<script src="angular-cookies/angular-cookies.min.js"></script>
-<script src="angular-local-storage/dist/angular-local-storage.min.js"></script>
-<script src="angularLocalStorage/src/angularLocalStorage.js"></script>
-<script src="angular-sortable-view/src/angular-sortable-view.min.js"></script>
+<script src="bower_components/jquery/dist/jquery.min.js" type="text/javascript"></script>
+<script src="bower_components/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="bower_components/angular/angular.min.js" type="text/javascript"></script>
+<script src="bower_components/angular-route/angular-route.min.js"></script>
+<script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+<script src="bower_components/angular-nl2br/angular-nl2br.min.js"></script>
+<script src="bower_components/angular-cookies/angular-cookies.min.js"></script>
+<script src="bower_components/angular-local-storage/dist/angular-local-storage.min.js"></script>
+<script src="bower_components/angularLocalStorage/src/angularLocalStorage.js"></script>
+<script src="bower_components/angular-sortable-view/src/angular-sortable-view.min.js"></script>
 <script src="github_project_issues.js"></script>
+
 </body>
 </html>
