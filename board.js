@@ -1,33 +1,4 @@
-$ = jQuery;
-
-/**
- * Created by torstenzwoch on 30.05.14.
- */
-/* AngularJS - change standard placeholder */
-var module = angular.module('github', ['ngSanitize', 'LocalStorageModule', 'nl2br', 'angularLocalStorage', 'angular-sortable-view']);
-module.config(['$interpolateProvider', '$compileProvider', 'localStorageServiceProvider', function ($interpolateProvider, $compileProvider, localStorageServiceProvider) {
-    $interpolateProvider.startSymbol('[[');
-    $interpolateProvider.endSymbol(']]');
-
-    module.directive = function (name, factory) {
-        $compileProvider.directive(name, factory);
-        return ( this );
-    };
-
-    // configuration of the session storage
-    localStorageServiceProvider
-        .setPrefix('fongas')
-        .setStorageType('sessionStorage')
-        .setNotify(true, true);
-}]);
-
-angular.module('github').config(function ($controllerProvider) {
-    $controllerProvider.allowGlobals();
-    module.controllerProvider = $controllerProvider;
-});
-
-
-var GithubProjectIssuesCtrl = function GithubProjectIssuesCtrl($scope, $timeout, $http) {
+var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
     $scope.repositories = [];
     $scope.github = {};
     $scope.githubtmp = {};
@@ -38,6 +9,8 @@ var GithubProjectIssuesCtrl = function GithubProjectIssuesCtrl($scope, $timeout,
     $scope.showRepo = false;
     $scope.showAllUserRepos = false;
     $scope.users = [];
+    $scope.bg= ["bg1.jpg","bg2.jpg","bg3.jpg","bg4.jpg","bg5.jpg"];
+    $scope.currentBg = "bg1.jpg";
 
     // collection of the logins
     $scope.repos = [];
@@ -342,7 +315,7 @@ var GithubProjectIssuesCtrl = function GithubProjectIssuesCtrl($scope, $timeout,
 };
 
 
-GithubProjectIssuesCtrl.$inject = ['$scope', '$timeout', '$http'];
-module.controller('GithubProjectIssuesCtrl', GithubProjectIssuesCtrl);
+BoardCtrl.$inject = ['$scope', '$timeout', '$http'];
+module.controller('BoardCtrl', BoardCtrl);
 
 

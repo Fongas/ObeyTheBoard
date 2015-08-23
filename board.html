@@ -1,0 +1,50 @@
+<div class="widget-body" ng-controller="BoardCtrl" id="BoardCtrl">
+    <a href="#user" class="btn btn-default">User</a>
+    <a href="#board" class="btn btn-default">Board</a>
+    <button type="button" ng-click="go('/board');" class="btn btn-default">Board</button>
+    <button type="button" ng-click="go('/user');" class="btn btn-default">User</button>
+
+    <!-- Columns START -->
+    <div class="row">
+        <div class="multi-multi-sortable" ng-repeat="column in board.columns track by $index">
+            <div class="sortable-container col-xs-2 block head bg-dot20" sv-root="multiple_{{$odd}}"
+                 sv-part="column.issues" sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
+                <div ng-show="editMode"><input ng-model="column.name" value="[[column.name]]"/>
+                    [[column.issues.length]]
+                </div>
+                <div ng-hide="editMode">[[column.name]] ([[column.issues.length]])</div>
+                <div class="side pull-right">
+                    <ul class="buttons">
+                        <li><a href="#"><span class="icon-cogs"></span></a></li>
+                    </ul>
+                </div>
+                <div ng-repeat="item in column.issues" sv-element
+                     class="multi panel bs-callout bs-callout-warning card">
+                    <div class="row">
+                        <div class="col-xs-9">
+                            <h1>[[item.title]]</h1>
+
+                            <p>
+                                <a href="[[item.html_url]]"
+                                   target="_blank" class="transicion" title="Ticket [[item.number]]"
+                                   alt="Ticket [[item.number]]"> <i class="fa fa-github"></i></a>
+                                <a href="[[item.html_url]]"
+                                   target="_blank" class="transicion" title="[[item.comments]] Kommentare"
+                                   alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
+                                <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
+                                <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
+                                [[item.milestone.title]]<br><br>
+                                    <span class="label label-default" style="background-color: [[label.color]];"
+                                          ng-repeat="label in item.labels track by $index">[[label.name]]</span>
+                            </p>
+                        </div>
+                        <div class="col-xs-3"><a href="[[item.assignee.html_url]]" target="_blank"><img
+                                src="[[item.assignee.avatar_url]]" ng-show="item.assignee" class="user-photo"
+                                title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Columns END -->
+</div>

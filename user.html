@@ -1,0 +1,90 @@
+<div class="widget-body" ng-controller="UserCtrl" id="UserCtrl">
+    <a href="#user" class="btn btn-default">User</a>
+    <a href="#board" class="btn btn-default">Board</a>
+    <button type="button" ng-click="go('/board');" class="btn btn-default">Board</button>
+    <button type="button" ng-click="go('/user');" class="btn btn-default">User</button>
+    <div class="">
+        <div class="row">
+            <form class="form-inline padding-bottom-40">
+                <div class="form-group">
+                    <label for="token">Github Token</label>
+                    <input type="text" class="form-control" id="token" placeholder="Token" ng-model="github.token">
+                </div>
+                <button type="submit" class="btn btn-default" ng-click="addUser(github.token)">Benutzer hinzufügen
+                </button>
+                <button type="submit" class="btn btn-default" ng-click="loadUserRepos()">loadUserRepos</button>
+            </form>
+        </div>
+        <!-- USER WITH ALL REPOS START -->
+        <a class="btn btn-primary" role="button" data-toggle="collapse" ng-click="toggleAllUserRepos()">
+            <span ng-show="!showAllUserRepos">Alle Benutzer mit Repos einblenden</span><span ng-show="showAllUserRepos">Alle Benutzer mit Repos ausblenden</span>
+        </a>
+
+        <div class="row" ng-show="showAllUserRepos">
+            <div class="col-md-3" ng-repeat="user in users track by $index">
+                <div class="row">
+                    <div class="col-md-12">
+                        <span>Benutzer: [[user.user.login]]</span><br>
+                        <span>Repos:</span>
+                        <ul>
+                            <li ng-repeat="repo in user.repos track by $index">
+                                [[repo.name]]
+                                <button class="btn btn-default"
+                                        ng-click="addRepository(repo.name,repo.full_name,user.token,user.type)">
+                                    Hinzufügen
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- USER WITH ALL REPOS END -->
+    </div>
+
+    <hr/>
+
+    <!-- REPOS START -->
+    <a class="btn btn-primary" role="button" data-toggle="collapse" ng-click="toggleRepo()">
+        <span ng-show="!showRepo">Repos einblenden</span><span ng-show="showRepo">Repos ausblenden</span>
+    </a>
+
+    <div class="row" ng-show="showRepo">
+        <div class="multi-multi-sortable" ng-repeat="repo in repos track by $index">
+            <div class="sortable-container col-xs-3 column block" sv-root="multiple_{{$odd}}" sv-part="repo.issues"
+                 sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
+                <div class="row">
+                    <div class="col-xs-9"><h1>[[repo.name]] ([[repo.issues.length]])</h1></div>
+                    <div class="col-xs-3"><a href="#" ng-click="deleteRepository(repo, $index)"><i
+                            class="fa fa-trash-o"></i></a></div>
+                </div>
+                <div ng-repeat="item in repo.issues track by $index" sv-element
+                     class="multi panel bs-callout bs-callout-warning card">
+                    <div class="row">
+                        <div class="col-xs-9">
+                            <h1>[[item.title]]</h1>
+
+                            <p>
+                                <a href="[[item.html_url]]"
+                                   target="_blank" class="transicion" title="Ticket [[item.number]]"
+                                   alt="Ticket [[item.number]]"> <i class="fa fa-github"></i></a>
+                                <a href="[[item.html_url]]"
+                                   target="_blank" class="transicion" title="[[item.comments]] Kommentare"
+                                   alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
+                                <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
+                                <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
+                                [[item.milestone.title]]<br><br>
+                                    <span class="label label-default" style="background-color: [[label.color]];"
+                                          ng-repeat="label in item.labels track by $index">[[label.name]]</span>
+                            </p>
+                        </div>
+                        <div class="col-xs-3"><a href="[[item.assignee.html_url]]" target="_blank"><img
+                                src="[[item.assignee.avatar_url]]" ng-show="item.assignee" class="user-photo"
+                                title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- REPOS END -->
+</div>
