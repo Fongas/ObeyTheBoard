@@ -1,9 +1,142 @@
 <div class="widget-body" ng-controller="UserCtrl" id="UserCtrl">
-    <a href="#user" class="btn btn-default">User</a>
-    <a href="#board" class="btn btn-default">Board</a>
-    <button type="button" ng-click="go('/board');" class="btn btn-default">Board</button>
-    <button type="button" ng-click="go('/user');" class="btn btn-default">User</button>
-    <div class="">
+    <div class="row">
+        <div class="col-md-12">
+            <button type="button" ng-click="go('/board');" class="btn btn-default">Board</button>
+            <button type="button" ng-click="go('/user');" class="btn btn-default">User</button>
+        </div>
+    </div>
+    <div class="space-24"></div>
+    <div class="row">
+        <div class="col-xs-12 col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading trans-background">
+                    <span class="panel-header-title">Users</span>
+
+                    <form class="form-inline">
+                        <div class="form-group pull-right" style="position: relative;top: -23px;">
+                            <input type="text" class="form-control" id="token" placeholder="Github Token"
+                                   ng-model="github.token">
+                            <button type="submit" class="btn btn-xs" ng-click="addUser(github.token)">+</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="panel-body">
+                    <ul class="list-group">
+                        <li class="list-group-item cursor-pointer" ng-repeat="user in users track by $index"
+                            ng-click="editUser(user)">
+                            <span class="badge">[[user.repos.length]]</span>
+                            <span ng-bind="user.user.login"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-9">
+            <div class="panel panel-default" ng-if="currentUser.user.login !== undefined">
+                <div class="panel-heading trans-background">[[currentUser.user.login]]</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-xs-12 col-md-9">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="inputLogin" class="control-label col-xs-2">Login</label>
+
+                                    <div class="col-xs-9">
+                                        <input type="text" class="form-control" id="inputLogin"
+                                               value="[[currentUser.user.login]]" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputName" class="control-label col-xs-2">Name</label>
+
+                                    <div class="col-xs-9">
+                                        <input type="text" class="form-control" id="inputName"
+                                               value="[[currentUser.user.name]]" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputEmail" class="control-label col-xs-2">Email</label>
+
+                                    <div class="col-xs-9">
+                                        <input type="text" class="form-control" id="inputEmail"
+                                               value="[[currentUser.user.email]]" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputLastUpdate" class="control-label col-xs-2">Stand</label>
+
+                                    <div class="col-xs-9">
+                                        <input type="text" class="form-control" id="inputLastUpdate"
+                                               value="[[currentUser.user.updated_at | date]]" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-xs-2">Url</label>
+
+                                    <div class="col-xs-9">
+                                        <span class="form-control none-background"><a href="[[currentUser.user.url]]">[[currentUser.user.url]]</a></span>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="space-24"></div><div class="space-24"></div>
+                        </div>
+                        <div class="col-xs-12 col-md-3">
+                            <img src="[[currentUser.user.avatar_url]]" class="col-xs-12 col-md-12"/>
+                        </div>
+                        <div class="col-xs-12 col-md-12">
+                            <div class="panel-heading trans-background ng-binding">Repositories ([[currentUser.repos.length]])</div>
+                            <div class="row">
+                                <div class="col-xs-6" ng-repeat="repo in currentUser.repos track by $index">
+                                    <button type="button" class="btn none-background" aria-label="Right Align">
+                                        <span ng-if="isRepoWatchEnabled(repo)" class="fa fa-check-square-o" ng-click="deleteRepository(repo)"></span>
+                                        <span ng-if="!isRepoWatchEnabled(repo)" class="fa fa-square-o" ng-click="addRepository(repo.name,repo.full_name,user.token,user.type,repo.id)"></span>
+                                    </button>
+                                    [[repo.name]]
+                                </div>
+                                <hr>
+                                <span ng-if="false">
+                                <div class="col-xs-6" ng-repeat="repo in currentUser.repos track by $index">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default dropdown-toggle"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            [[repo.name]] <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#">Action</a></li>
+                                            <li><a href="#">Another action</a></li>
+                                            <li><a href="#">Something else here</a></li>
+                                            <li role="separator" class="divider"></li>
+                                            <li><a href="#">Separated link</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <ul>
+                                    <li ng-repeat="repo in currentUser.repos track by $index" class="col-xs-2">
+                                        [[repo.name]] ([[repo.id]])
+                                        <button class="btn btn-default"
+                                                ng-click="addRepository(repo.name,repo.full_name,user.token,user.type,repo.id)">
+                                            Hinzufügen
+                                        </button>
+                                    </li>
+                                </ul>
+                                    </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div ng-if="false">
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+
         <div class="row">
             <form class="form-inline padding-bottom-40">
                 <div class="form-group">
@@ -40,51 +173,52 @@
             </div>
         </div>
         <!-- USER WITH ALL REPOS END -->
-    </div>
 
-    <hr/>
 
-    <!-- REPOS START -->
-    <a class="btn btn-primary" role="button" data-toggle="collapse" ng-click="toggleRepo()">
-        <span ng-show="!showRepo">Repos einblenden</span><span ng-show="showRepo">Repos ausblenden</span>
-    </a>
+        <hr/>
 
-    <div class="row" ng-show="showRepo">
-        <div class="multi-multi-sortable" ng-repeat="repo in repos track by $index">
-            <div class="sortable-container col-xs-3 column block" sv-root="multiple_{{$odd}}" sv-part="repo.issues"
-                 sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
-                <div class="row">
-                    <div class="col-xs-9"><h1>[[repo.name]] ([[repo.issues.length]])</h1></div>
-                    <div class="col-xs-3"><a href="#" ng-click="deleteRepository(repo, $index)"><i
-                            class="fa fa-trash-o"></i></a></div>
-                </div>
-                <div ng-repeat="item in repo.issues track by $index" sv-element
-                     class="multi panel bs-callout bs-callout-warning card">
+        <!-- REPOS START -->
+        <a class="btn btn-primary" role="button" data-toggle="collapse" ng-click="toggleRepo()">
+            <span ng-show="!showRepo">Repos einblenden</span><span ng-show="showRepo">Repos ausblenden</span>
+        </a>
+
+        <div class="row" ng-show="showRepo">
+            <div class="multi-multi-sortable" ng-repeat="repo in repos track by $index">
+                <div class="sortable-container col-xs-3 column block" sv-root="multiple_{{$odd}}" sv-part="repo.issues"
+                     sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
                     <div class="row">
-                        <div class="col-xs-9">
-                            <h1>[[item.title]]</h1>
+                        <div class="col-xs-9"><h1>[[repo.name]] ([[repo.issues.length]])</h1></div>
+                        <div class="col-xs-3"><a href="#" ng-click="deleteRepository(repo, $index)"><i
+                                class="fa fa-trash-o"></i></a></div>
+                    </div>
+                    <div ng-repeat="item in repo.issues track by $index" sv-element
+                         class="multi panel bs-callout bs-callout-warning card">
+                        <div class="row">
+                            <div class="col-xs-9">
+                                <h1>[[item.title]]</h1>
 
-                            <p>
-                                <a href="[[item.html_url]]"
-                                   target="_blank" class="transicion" title="Ticket [[item.number]]"
-                                   alt="Ticket [[item.number]]"> <i class="fa fa-github"></i></a>
-                                <a href="[[item.html_url]]"
-                                   target="_blank" class="transicion" title="[[item.comments]] Kommentare"
-                                   alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
-                                <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
-                                <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
-                                [[item.milestone.title]]<br><br>
+                                <p>
+                                    <a href="[[item.html_url]]"
+                                       target="_blank" class="transicion" title="Ticket [[item.number]]"
+                                       alt="Ticket [[item.number]]"> <i class="fa fa-github"></i></a>
+                                    <a href="[[item.html_url]]"
+                                       target="_blank" class="transicion" title="[[item.comments]] Kommentare"
+                                       alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
+                                    <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
+                                    <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
+                                    [[item.milestone.title]]<br><br>
                                     <span class="label label-default" style="background-color: [[label.color]];"
                                           ng-repeat="label in item.labels track by $index">[[label.name]]</span>
-                            </p>
+                                </p>
+                            </div>
+                            <div class="col-xs-3"><a href="[[item.assignee.html_url]]" target="_blank"><img
+                                    src="[[item.assignee.avatar_url]]" ng-show="item.assignee" class="user-photo"
+                                    title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></div>
                         </div>
-                        <div class="col-xs-3"><a href="[[item.assignee.html_url]]" target="_blank"><img
-                                src="[[item.assignee.avatar_url]]" ng-show="item.assignee" class="user-photo"
-                                title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></div>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- REPOS END -->
     </div>
-    <!-- REPOS END -->
 </div>

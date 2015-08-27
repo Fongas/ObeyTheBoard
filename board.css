@@ -1382,3 +1382,12 @@ span {
     display: table;
     margin-bottom: 5px;
 }
+
+
+.panel .panel-heading {
+    background: rgba(0,0,0,0.2);
+    border: 0px;
+    color: #FFF;
+    position: relative;
+    padding: 10px 10px 10px 15px;
+}

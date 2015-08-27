@@ -28,6 +28,10 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
                 'issues': []
             },
             {
+                'name': 'Doing222',
+                'issues': []
+            },
+            {
                 'name': 'Done',
                 'issues': []
             }
@@ -210,20 +214,25 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         return url.split("/issues")[0];
     };
 
-    $scope.addRepository = function (name, url, token, type) {
-        $scope.repos.push(
-            {
-                "name": name,
-                "url": url,
-                "token": token,
-                "lastupdate": "",
-                'type': type,
-                "issues": []
-            });
-        $scope.github.name = "";
-        $scope.github.url = "";
-        $scope.github.token = "";
-        localStorage.setItem("github.repos", JSON.stringify($scope.repos));
+    $scope.addRepository = function (name, url, token, type, id) {
+        var newRepo = {
+            "id": id,
+            "name": name,
+            "url": url,
+            "token": token,
+            "lastupdate": "",
+            'type': type,
+            "issues": []
+        };
+
+        if(!$scope.isRepoWatchEnabled(newRepo)){
+            $scope.repos.push(newRepo);
+            $scope.github.name = "";
+            $scope.github.url = "";
+            $scope.github.token = "";
+            localStorage.setItem("github.repos", JSON.stringify($scope.repos));
+        }
+
     };
 
     $scope.deleteRepository = function (repo, $index) {
@@ -278,7 +287,7 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
     };
 
 
-    $scope.init = function () {
+    $scope.init = function init() {
         // read users from local storage
         var users = localStorage.getItem("fongas.users");
         if (users !== null) {
@@ -311,6 +320,12 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         $scope.loadIssues();
         $scope.getGitHubData();
     };
+
+    $scope.refreshAllData = function refreshAllData() {
+        localStorage.clear();
+        $scope.init();
+    };
+
     $scope.init();
 };
 

@@ -1,18 +1,18 @@
 <div class="widget-body" ng-controller="BoardCtrl" id="BoardCtrl">
-    <a href="#user" class="btn btn-default">User</a>
-    <a href="#board" class="btn btn-default">Board</a>
-    <button type="button" ng-click="go('/board');" class="btn btn-default">Board</button>
-    <button type="button" ng-click="go('/user');" class="btn btn-default">User</button>
-
+    <div class="row">
+        <div class="col-md-12">
+            <button type="button" ng-click="go('/board');" class="btn btn-default">Board</button>
+            <button type="button" ng-click="go('/user');" class="btn btn-default">User</button>
+            <button type="button" ng-click="refreshAllData();" class="btn btn-default">Refresh all Data</button>
+        </div>
+    </div>
+    <div class="space-24"></div>
     <!-- Columns START -->
     <div class="row">
         <div class="multi-multi-sortable" ng-repeat="column in board.columns track by $index">
             <div class="sortable-container col-xs-2 block head bg-dot20" sv-root="multiple_{{$odd}}"
                  sv-part="column.issues" sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
-                <div ng-show="editMode"><input ng-model="column.name" value="[[column.name]]"/>
-                    [[column.issues.length]]
-                </div>
-                <div ng-hide="editMode">[[column.name]] ([[column.issues.length]])</div>
+                <div>[[column.name]] ([[column.issues.length]])</div>
                 <div class="side pull-right">
                     <ul class="buttons">
                         <li><a href="#"><span class="icon-cogs"></span></a></li>
