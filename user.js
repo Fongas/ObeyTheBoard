@@ -1,8 +1,28 @@
 var UserCtrl = function UserCtrl($scope, $timeout, $http) {
     $scope.addUser = function (token) {
-        $scope.users.push({'token': token, 'type': 'github', 'user': {}, 'repos': []});
-        $scope.loadUserData();
-        $scope.loadUserRepos();
+        if(token!=""){
+            $scope.users.push({'token': token, 'type': 'github', 'user': {}, 'repos': []});
+            $scope.loadUserData();
+            $scope.loadUserRepos();
+            localStorage.setItem("fongas.users", JSON.stringify($scope.users));
+        }
+    };
+
+    $scope.editUser = function editUser(user) {
+        $scope.currentUser = user;
+    };
+
+    $scope.deleteUser = function (user) {
+        var res = false;
+        res = $.grep($scope.users, function (n, i) {
+            if (n == user) {
+                $scope.users.splice(i, 1);
+                return true;
+            }
+        });
+        if(res){
+            $scope.currentUser = undefined;
+        }
         localStorage.setItem("fongas.users", JSON.stringify($scope.users));
     };
 

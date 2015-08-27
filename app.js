@@ -98,9 +98,6 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
         return url.split("/issues")[0];
     };
 
-    $scope.editUser = function editUser(user) {
-        $scope.currentUser = user;
-    };
 
 
     $scope.toggleRepo = function () {

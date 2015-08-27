@@ -150,6 +150,11 @@ span.none-background, .btn.none-background {
     border: none;
 }
 
+#user-detail .panel-heading .btn{
+position: relative;
+    top:-6px;
+}
+
 .space-6 {
     height: 6px;
 }
