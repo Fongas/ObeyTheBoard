@@ -86,7 +86,7 @@
                             <div class="space-24"></div>
                         </div>
                         <div class="col-xs-12 col-md-3">
-                            <img src="[[currentUser.user.avatar_url]]" class="col-xs-12 col-md-12"/>
+                            <img src="[[currentUser.user.avatar_url]]" class="col-xs-12 col-md-12 round-border"/>
                         </div>
                         <div class="col-xs-12 col-md-12">
                             <div class="panel-heading trans-background ng-binding">Repositories
@@ -98,7 +98,7 @@
                                         <span ng-if="isRepoWatchEnabled(repo)" class="fa fa-check-square-o"
                                               ng-click="deleteRepository(repo)"></span>
                                         <span ng-if="!isRepoWatchEnabled(repo)" class="fa fa-square-o"
-                                              ng-click="addRepository(repo.name,repo.full_name,user.token,user.type,repo.id)"></span>
+                                              ng-click="addRepository(repo,currentUser)"></span>
                                     </button>
                                     [[repo.name]]
                                 </div>

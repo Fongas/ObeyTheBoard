@@ -1,4 +1,8 @@
 var UserCtrl = function UserCtrl($scope, $timeout, $http) {
+
+    /**
+     * USERS
+     */
     $scope.addUser = function (token) {
         if(token!=""){
             $scope.users.push({'token': token, 'type': 'github', 'user': {}, 'repos': []});
@@ -26,14 +30,20 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http) {
         localStorage.setItem("fongas.users", JSON.stringify($scope.users));
     };
 
-    $scope.addRepository = function (name, url, token, type, id) {
+
+    /**
+     * REPOSITORIES
+     */
+    $scope.addRepository = function (repo, user) {
+
+
         var newRepo = {
-            "id": id,
-            "name": name,
-            "url": url,
-            "token": token,
+            "id": repo.id,
+            "name": repo.name,
+            "url": repo.full_name,
+            "token": user.token,
             "lastupdate": "",
-            'type': type,
+            'type': user.type,
             "issues": []
         };
 
@@ -42,19 +52,16 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http) {
             $scope.github.name = "";
             $scope.github.url = "";
             $scope.github.token = "";
-            localStorage.setItem("github.repos", JSON.stringify($scope.repos));
+            localStorage.setItem("fongas.repos", JSON.stringify($scope.repos));
         }
     };
 
     $scope.deleteRepository = function (repo) {
         var x = $.grep($scope.repos, function (n, i) {
-            if (n.id == repo.id) {
-                $scope.repos.splice(i, 1);
-                return true;
-            }
+            return n.id != repo.id;
         });
-
-        localStorage.setItem("github.repos", JSON.stringify($scope.repos));
+        $scope.repos = x;
+        localStorage.setItem("fongas.repos", JSON.stringify($scope.repos));
     };
 
     $scope.isRepoWatchEnabled = function isRepoWatchEnabled(repo) {
@@ -67,6 +74,32 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http) {
             return false;
         }
     };
+
+    /**
+     * INIT
+     */
+    $scope.init = function () {
+        // read users from local storage
+        var users = localStorage.getItem("fongas.users");
+        if (users !== null) {
+            $scope.users = JSON.parse(users);
+        } else {
+            localStorage.setItem("fongas.users", JSON.stringify($scope.users));
+        }
+
+        // enrich the user object with user data and repos from github etc.
+        $scope.loadUserData();
+        $scope.loadUserRepos();
+
+        // read repos from session storage
+        var repo = localStorage.getItem("fongas.repos");
+        if (repo !== null) {
+            $scope.repos = JSON.parse(repo);
+        } else {
+            localStorage.setItem("fongas.repos", JSON.stringify($scope.repos));
+        }
+    };
+    $scope.init();
 };
 
 
