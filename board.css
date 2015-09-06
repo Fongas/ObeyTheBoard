@@ -1391,3 +1391,8 @@ span {
     position: relative;
     padding: 10px 10px 10px 15px;
 }
+
+.multiSelect .checkBoxContainer{
+    height: 250px;
+    overflow: scroll;
+}

@@ -7,30 +7,43 @@
         </div>
     </div>
     <div class="space-24"></div>
-    <div class="row">
+    <div class="row" ng-if="showSelect">
+        <div class="col-xs-3" ng-repeat="column in boards[0].columns track by $index">
+            <div    isteven-multi-select
+                    input-model="availableTags[0][$index]"
+                    output-model="column.selectedTags"
+                    button-label=""
+                    button-pre-label="Filter Option"
+                    orientation="vertical"
+                    item-label="icon name maker"
+                    tick-property="selected"
+                    max-labels="0"
+                    translation="localLang"
+                    group-property="msGroup"
+                    on-item-click="saveBoards(0, $index)"
+                    directive-id="$index"
+                    >
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="showSelect">
         <div class="multi-multi-sortable" ng-repeat="column in boards[0].columns track by $index">
-            <div class="sortable-container col-xs-2 block head bg-dot20" sv-root="multiple_{{$odd}}"
-                 sv-part="column.issues" sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
+            <div class="sortable-container col-xs-2 block head bg-dot20">
                 <div>[[column.name]] ([[column.issues.length]])</div>
                 <div class="side pull-right">
                     <ul class="buttons">
                         <li><a href="#"><span class="icon-cogs"></span></a></li>
                     </ul>
                 </div>
-                <div ng-repeat="item in column.tags" sv-element
-                     class="multi panel bs-callout bs-callout-warning card">
+                <div ng-repeat="item in column.tags"
+                     class="multi panel bs-callout bs-callout-warning card" style="border-color: #[[item.color]];">
+                    [[item.name]] [[item.repo]]
                 </div>
-                <form class="form-inline">
-                    <div class="form-group pull-right" style="position: relative;top: -23px;">
-                        <input type="text" class="form-control" id="token" placeholder="Github Token"
-                               ng-model="github.token">
-                        <button type="submit" class="btn btn-xs" ng-click="addUser(github.token)">+</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
     <div class="space-24"></div>
+
     <!-- Columns START -->
     <div class="row">
         <div class="multi-multi-sortable" ng-repeat="column in boards[0].columns track by $index">
