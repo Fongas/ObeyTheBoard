@@ -102,7 +102,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
     });
 
     // load data from VersionControl (github)
-    $scope.loadIssues = function (repos, boards) {
+    $scope.loadTags = function (repos, boards) {
         if (repos !== undefined) {
             $scope.repos = repos;
         }
@@ -168,13 +168,18 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                         });
                     });
                     $timeout(function () {
+                        $scope.loadIssues();
                         $scope.showSelect = true;
                     }, 100);
                 });
             });
+        });
 
+    };
 
-            //ISSUES
+    //ISSUES
+    $scope.loadIssues = function () {
+        $.each($scope.repos, function (repoIndex, repoValue) {
             $.ajax({
                 url: 'https://' + $scope.repos[repoIndex].token + ':x-oauth-basic@api.github.com/repos/' + $scope.repos[repoIndex].url + '/issues?state=all&filter=all',
                 type: 'GET',
@@ -184,31 +189,52 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
             }).done(function (response) {
                 $scope.$apply(function () {
                     /* EINORDNEN DER TICKETS IN DIE COLUMNS ANHAND DER HINTERLEGTEN TAGS PRO COLUMN*/
+                    var board = angular.copy($scope.boards);
+                    // EACH TICKET
+                    $.each(response, function (index, value) {
+                        //CHECK EACH BOARD
+                        $.each($scope.boards, function (indexBoard, valueBoard) {
+                            //CHECK IF TICKET MUST PUSH TO COLUMN
+                            $.each($scope.boards[indexBoard].columns, function (indexColumn, valueColumn) {
+                                //EACH TAG IN COLUMN
+                                $.each($scope.boards[indexBoard].columns[indexColumn].tags, function (indexTags, valueTags) {
+                                    var isSelected = $.grep(response[index].labels, function (n, i) {
+                                        return (n.name == $scope.boards[indexBoard].columns[indexColumn].tags[indexTags].name && n.url == $scope.boards[indexBoard].columns[indexColumn].tags[indexTags].url);
+                                    });
 
-                    /*
-                     $.each(response, function (index, value) {
-                     //prüfen ob die ID in den Spalten vohanden ist
-                     var issueAlreadyPlanned = false;
-                     $.each($scope.boards.columns, function (index2, value2) {
-                     response[index]['id']
-                     var resIndex = $scope.findIndexByKeyValue($scope.boards.columns[index2].issues, "id", response[index]['id']);
-                     if (resIndex !== null) {
-                     angular.extend($scope.boards.columns[index2].issues[resIndex], response[index]);
-                     response.splice(index, 1);
-                     issueAlreadyPlanned = true;
-                     }
-                     });
-                     if (!issueAlreadyPlanned) {
-                     var tmp = new Array();
-                     tmp.push(response[index]);
-                     $scope.repos[repoIndex].issues.push(response[index]);
-                     }
-                     });
-                     */
+                                    if (isSelected.length > 0) {
+                                        var isIssueInList = $.grep($scope.boards[indexBoard].columns[indexColumn].issues, function (n, i) {
+                                            return (n.id == response[index].id);
+                                        });
+                                        if (isIssueInList == 0){
+                                            $scope.boards[indexBoard].columns[indexColumn].issues.push(response[index]);
+                                        }
+                                    }
+                                });
+                            });
+                        });
+
+                        //prüfen ob die ID in den Spalten vohanden ist
+                        /*var issueAlreadyPlanned = false;
+                         $.each($scope.boards.columns, function (index2, value2) {
+                         response[index]['id']
+                         var resIndex = $scope.findIndexByKeyValue($scope.boards.columns[index2].issues, "id", response[index]['id']);
+                         if (resIndex !== null) {
+                         angular.extend($scope.boards.columns[index2].issues[resIndex], response[index]);
+                         response.splice(index, 1);
+                         issueAlreadyPlanned = true;
+                         }
+                         });
+                         if (!issueAlreadyPlanned) {
+                         var tmp = new Array();
+                         tmp.push(response[index]);
+                         $scope.repos[repoIndex].issues.push(response[index]);
+                         }*/
+                    });
+                    //$scope.boards = board;
                 });
             });
         });
-
     };
 
     $scope.loadUserData = function () {
@@ -237,7 +263,6 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                 }
             }).done(function (response) {
                 $scope.users[repoIndex].repos = response;
-                console.error(response);
             });
         });
     };

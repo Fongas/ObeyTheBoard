@@ -79,7 +79,7 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         }
 
         // read all issues and update the column data
-        $scope.loadIssues($scope.repos, $scope.boards);
+        $scope.loadTags($scope.repos, $scope.boards);
     };
     $scope.init();
 };

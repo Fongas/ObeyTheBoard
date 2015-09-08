@@ -45,7 +45,7 @@
     <div class="space-24"></div>
 
     <!-- Columns START -->
-    <div class="row">
+    <div class="row" ng-hide="false">
         <div class="multi-multi-sortable" ng-repeat="column in boards[0].columns track by $index">
             <div class="sortable-container col-xs-2 block head bg-dot20" sv-root="multiple_{{$odd}}"
                  sv-part="column.issues" sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
