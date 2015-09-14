@@ -91,6 +91,9 @@
                         <div class="col-xs-12 col-md-12">
                             <div class="panel-heading trans-background ng-binding">Repositories
                                 ([[currentUser.repos.length]])
+                                <span class="pull-right">
+                                    <button class="btn btn-xs no-padding" ng-click="refreshRepositories()">refresh</button>
+                                </span>
                             </div>
                             <div class="row">
                                 <div class="col-xs-6" ng-repeat="repo in currentUser.repos track by $index">

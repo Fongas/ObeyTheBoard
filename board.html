@@ -4,32 +4,42 @@
             <button type="button" ng-click="go('/board');" class="btn btn-default">Board</button>
             <button type="button" ng-click="go('/user');" class="btn btn-default">User</button>
             <button type="button" ng-click="refreshAllData();" class="btn btn-default">Refresh all Data</button>
+            <button type="button" ng-click="show();" class="btn btn-default">show</button>
+            <button type="button" ng-click="hide();" class="btn btn-default">hide</button>
         </div>
     </div>
     <div class="space-24"></div>
     <div class="row" ng-if="showSelect">
         <div class="col-xs-3" ng-repeat="column in boards[0].columns track by $index">
-            <div    isteven-multi-select
-                    input-model="availableTags[0][$index]"
-                    output-model="column.selectedTags"
-                    button-label=""
-                    button-pre-label="Filter Option"
-                    orientation="vertical"
-                    item-label="icon name maker"
-                    tick-property="selected"
-                    max-labels="0"
-                    translation="localLang"
-                    group-property="msGroup"
-                    on-item-click="saveBoards(0, $index)"
-                    directive-id="$index"
+            <div isteven-multi-select
+                 input-model="availableTags[0][$index]"
+                 output-model="column.selectedTags"
+                 button-label=""
+                 button-pre-label="Label-Filter"
+                 orientation="vertical"
+                 item-label="icon name maker"
+                 tick-property="selected"
+                 max-labels="0"
+                 translation="localLang"
+                 group-property="msGroup"
+                 on-item-click="saveBoards(0, $index)"
+                 directive-id="$index"
                     >
             </div>
+            <select name="singleSelect" ng-model="column.selectedStates" ng-change="saveBoards(0, $index)">
+                <optgroup label="Github States">
+                    <option value="open" ng-selected="column.selectedStates == 'open'">Open</option>
+                    <option value="closed" ng-selected="column.selectedStates == 'closed'">Closed</option>
+                </optgroup>
+            </select>
         </div>
     </div>
     <div class="row" ng-if="showSelect">
         <div class="multi-multi-sortable" ng-repeat="column in boards[0].columns track by $index">
             <div class="sortable-container col-xs-2 block head bg-dot20">
-                <div>[[column.name]] ([[column.issues.length]])</div>
+                <div class="panel-heading trans-background">
+                    <span class="panel-header-title">[[column.name]]</span>
+                </div>
                 <div class="side pull-right">
                     <ul class="buttons">
                         <li><a href="#"><span class="icon-cogs"></span></a></li>
@@ -45,11 +55,14 @@
     <div class="space-24"></div>
 
     <!-- Columns START -->
-    <div class="row" ng-hide="false">
-        <div class="multi-multi-sortable" ng-repeat="column in boards[0].columns track by $index">
+    <div class="row" ng-hide="false" ng-if="showSelect">
+        <div class="multi-multi-sortable" ng-repeat="column in $parent.boards[0].columns track by $index">
             <div class="sortable-container col-xs-2 block head bg-dot20" sv-root="multiple_{{$odd}}"
-                 sv-part="column.issues" sv-on-sort="save($item, $partFrom, $partTo, $indexFrom, $indexTo)">
-                <div>[[column.name]] ([[column.issues.length]])</div>
+                 sv-part="column.issues" sv-on-sort="sort($item, $partFrom, $partTo, $indexFrom, $indexTo, $index)"
+                 sv-on-stop="end($item, $part, $index)">
+                <div class="panel-heading trans-background">
+                    <span class="panel-header-title">[[column.name]] ([[column.issues.length]])</span>
+                </div>
                 <div class="side pull-right">
                     <ul class="buttons">
                         <li><a href="#"><span class="icon-cogs"></span></a></li>
@@ -59,8 +72,7 @@
                      class="multi panel bs-callout bs-callout-warning card">
                     <div class="row">
                         <div class="col-xs-9">
-                            <h1>[[item.title]]</h1>
-
+                            <h1>[[item.title]] [[item.state]]</h1>
                             <p>
                                 <a href="[[item.html_url]]"
                                    target="_blank" class="transicion" title="Ticket [[item.number]]"

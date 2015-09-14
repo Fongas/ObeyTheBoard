@@ -52,11 +52,28 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
     $scope.tags = [];
     $scope.availableTags = [];
     $scope.selectedTags = [];
+    $scope.selectedStates=[];
+    $scope.availableRepoStates = [];
     $scope.showSelect = true;
 
     // Repos to watch of the current user
     $scope.repos = [];
     $scope.boards = undefined;
+
+    $scope.repoState = [
+        {
+            name: '<strong>Github States</strong>',
+            msGroup: true
+        },
+        {
+            name: 'closed',
+            msGroup: false
+        },
+        {
+            name: 'open',
+            msGroup: false
+        }
+    ];
 
     // board structure template
     $scope.boardsTemplate = {
@@ -65,21 +82,25 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
             {
                 'name': 'Backlog',
                 'tags': [],
+                'states':[],
                 'issues': []
             },
             {
                 'name': 'Next',
                 'tags': [],
+                'states':[],
                 'issues': []
             },
             {
                 'name': 'Doing',
                 'tags': [],
+                'states':[],
                 'issues': []
             },
             {
                 'name': 'Done',
                 'tags': [],
+                'states':[],
                 'issues': []
             }
         ]
@@ -103,6 +124,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
 
     // load data from VersionControl (github)
     $scope.loadTags = function (repos, boards) {
+        var random = Math.random();
         if (repos !== undefined) {
             $scope.repos = repos;
         }
@@ -111,7 +133,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
         }
         $.each($scope.repos, function (repoIndex, repoValue) {
             $.ajax({
-                url: 'https://' + $scope.repos[repoIndex].token + ':x-oauth-basic@api.github.com/repos/' + $scope.repos[repoIndex].url + '/labels?state=all&filter=all',
+                url: 'https://' + $scope.repos[repoIndex].token + ':x-oauth-basic@api.github.com/repos/' + $scope.repos[repoIndex].url + '/labels?state=all&filter=all&random=' + random,
                 type: 'GET',
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("Authorization", "token " + $scope.repos[repoIndex].token + "");
@@ -165,11 +187,37 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                                 $scope.availableTags[index] = [];
                             }
                             $scope.availableTags[index][indexCol] = tmpAvailableTags;
+
+
+                            if($scope.boards[index].columns[indexCol].states == undefined){
+                                $scope.boards[index].columns[indexCol].states = [];
+                            }
+                            $scope.selectedStates = $scope.boards[index].columns[indexCol].states;
+                            var tmpAvailableRepoStates = angular.copy($scope.repoState);
+                            $.each(tmpAvailableRepoStates, function (indexAvailable, valueAvailable) { // alle verfügbaren Tags durchgehen und selected setzen
+
+                                if (tmpAvailableRepoStates[indexAvailable].msgroup != true) {
+                                    var isSelectedState = $.grep($scope.selectedStates, function (n, i) {
+                                        return (n.name == tmpAvailableRepoStates[indexAvailable].name);
+                                    });
+
+                                    if (isSelectedState == undefined || isSelectedState.length == 0) {
+                                        tmpAvailableRepoStates[indexAvailable].selected = false;
+                                    } else {
+                                        tmpAvailableRepoStates[indexAvailable].selected = true;
+                                    }
+                                }
+                            });
+
+                            if ($scope.availableRepoStates[index] == undefined) {
+                                $scope.availableRepoStates[index] = [];
+                            }
+
+                            $scope.availableRepoStates[index][indexCol] = tmpAvailableRepoStates;
                         });
                     });
                     $timeout(function () {
                         $scope.loadIssues();
-                        $scope.showSelect = true;
                     }, 100);
                 });
             });
@@ -179,9 +227,10 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
 
     //ISSUES
     $scope.loadIssues = function () {
+        var random = Math.random();
         $.each($scope.repos, function (repoIndex, repoValue) {
             $.ajax({
-                url: 'https://' + $scope.repos[repoIndex].token + ':x-oauth-basic@api.github.com/repos/' + $scope.repos[repoIndex].url + '/issues?state=all&filter=all',
+                url: 'https://' + $scope.repos[repoIndex].token + ':x-oauth-basic@api.github.com/repos/' + $scope.repos[repoIndex].url + '/issues?state=all&filter=all&random=' + random,
                 type: 'GET',
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("Authorization", "token " + $scope.repos[repoIndex].token + "");
@@ -190,6 +239,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                 $scope.$apply(function () {
                     /* EINORDNEN DER TICKETS IN DIE COLUMNS ANHAND DER HINTERLEGTEN TAGS PRO COLUMN*/
                     var board = angular.copy($scope.boards);
+                    console.log(response);
                     // EACH TICKET
                     $.each(response, function (index, value) {
                         //CHECK EACH BOARD
@@ -202,15 +252,24 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                                         return (n.name == $scope.boards[indexBoard].columns[indexColumn].tags[indexTags].name && n.url == $scope.boards[indexBoard].columns[indexColumn].tags[indexTags].url);
                                     });
 
+
                                     if (isSelected.length > 0) {
+                                        console.log(response[index].state);
                                         var isIssueInList = $.grep($scope.boards[indexBoard].columns[indexColumn].issues, function (n, i) {
                                             return (n.id == response[index].id);
                                         });
-                                        if (isIssueInList == 0){
+                                        if (isIssueInList == 0) {
                                             $scope.boards[indexBoard].columns[indexColumn].issues.push(response[index]);
                                         }
                                     }
                                 });
+
+                                /* clean Repo from state */
+                                var newList = $.grep($scope.boards[indexBoard].columns[indexColumn].issues, function (n, i) {
+                                    return (n.state == $scope.boards[indexBoard].columns[indexColumn].states);
+                                });
+                                $scope.boards[indexBoard].columns[indexColumn].issues = newList;
+
                             });
                         });
 
@@ -231,16 +290,19 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                          $scope.repos[repoIndex].issues.push(response[index]);
                          }*/
                     });
+
                     //$scope.boards = board;
+                    $scope.showSelect = true;
                 });
             });
         });
     };
 
     $scope.loadUserData = function () {
+        var random = Math.random();
         $.each($scope.users, function (repoIndex, repoValue) {
             $.ajax({
-                url: 'https://' + $scope.users[repoIndex].token + ':x-oauth-basic@api.github.com/user',
+                url: 'https://' + $scope.users[repoIndex].token + ':x-oauth-basic@api.github.com/user?random=' + random,
                 type: 'GET',
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("Authorization", "token " + $scope.users[repoIndex].token + "");
@@ -253,16 +315,23 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
         });
     };
 
-    $scope.loadUserRepos = function () {
+    $scope.loadUserRepos = function (currentUser) {
+        var random = Math.random();
         $.each($scope.users, function (repoIndex, repoValue) {
             $.ajax({
-                url: 'https://' + $scope.users[repoIndex].token + ':x-oauth-basic@api.github.com/user/repos',
+                url: 'https://' + $scope.users[repoIndex].token + ':x-oauth-basic@api.github.com/user/repos?random=' + random,
                 type: 'GET',
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("Authorization", "token " + $scope.users[repoIndex].token + "");
                 }
             }).done(function (response) {
-                $scope.users[repoIndex].repos = response;
+                $scope.$apply(function () {
+                    if (currentUser !== undefined) {
+                        currentUser.repos = response;
+                    }
+                    $scope.users[repoIndex].repos = response;
+                    localStorage.setItem("fongas.users", JSON.stringify($scope.users));
+                });
             });
         });
     };

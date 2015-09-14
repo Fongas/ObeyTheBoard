@@ -39,9 +39,57 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
     $scope.saveBoards = function (boardIndex,colIndex) {
         if ($scope.boards !== undefined) {
             $scope.boards[boardIndex].columns[colIndex].tags = $scope.boards[boardIndex].columns[colIndex].selectedTags;
+            $scope.boards[boardIndex].columns[colIndex].states = $scope.boards[boardIndex].columns[colIndex].selectedStates;
             localStorage.setItem("fongas.boards", JSON.stringify($scope.boards));
         }
     };
+
+    $scope.sort = function ($item, $partFrom, $partTo, $indexFrom, $indexTo, $index) {
+        console.log($item);
+        console.log($partFrom);
+        console.log($partTo);
+        console.log($indexFrom);
+        console.log($indexTo);
+        console.log($index);
+    };
+
+    $scope.end = function ($item, $part, $index) {
+        console.log("check");
+        console.log($item);
+        console.log($part);
+        console.log($index);
+    };
+
+
+
+    $scope.$watch('boards[0].columns', function(newValue, oldValue) {
+        console.log("NEW");
+        console.log(newValue);
+
+        console.log("OLD");
+        console.log(oldValue);
+    });
+
+    $scope.isOpen = function(item) {
+        if (item.state == "open") {
+            return true;
+        }
+
+        return false;
+    };
+
+    $scope.show = function() {
+        console.log($scope.boards);
+
+
+        $scope.showSelect = true;
+    };
+    $scope.hide = function() {
+        console.log($scope.boards);
+        $scope.showSelect = false;
+    };
+
+    $scope.getDatetime = new Date();
 
     /**
      * INIT
@@ -50,7 +98,8 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         // read users from local storage
         var users = localStorage.getItem("fongas.users");
         if (users !== null) {
-            $scope.users = JSON.parse(users);
+            $scope.$parent.users = JSON.parse(users);
+            //$scope.users = JSON.parse(users);
         } else {
             localStorage.setItem("fongas.users", JSON.stringify($scope.users));
         }
@@ -62,7 +111,8 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         // read repos from session storage
         var repo = localStorage.getItem("fongas.repos");
         if (repo !== null) {
-            $scope.repos = JSON.parse(repo);
+            $scope.$parent.repos = JSON.parse(repo);
+            //$scope.repos = JSON.parse(repo);
         } else {
             localStorage.setItem("fongas.repos", JSON.stringify($scope.repos));
         }
@@ -70,7 +120,8 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         // read board with columns from local storage
         var board = localStorage.getItem("fongas.boards");
         if (board !== null) {
-            $scope.boards = JSON.parse(board);
+            $scope.$parent.boards = JSON.parse(board);
+            //$scope.boards = JSON.parse(board);
         } else {
             //set board template as default
             $scope.boards = [];
@@ -79,7 +130,7 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         }
 
         // read all issues and update the column data
-        $scope.loadTags($scope.repos, $scope.boards);
+        $scope.loadTags($scope.$parent.repos, $scope.$parent.boards);
     };
     $scope.init();
 };

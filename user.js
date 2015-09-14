@@ -5,10 +5,10 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http) {
      */
     $scope.addUser = function (token) {
         if(token!=""){
-            $scope.users.push({'token': token, 'type': 'github', 'user': {}, 'repos': []});
+            $scope.$parent.users.push({'token': token, 'type': 'github', 'user': {}, 'repos': []});
             $scope.loadUserData();
             $scope.loadUserRepos();
-            localStorage.setItem("fongas.users", JSON.stringify($scope.users));
+            localStorage.setItem("fongas.users", JSON.stringify($scope.$parent.users));
         }
     };
 
@@ -18,9 +18,9 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http) {
 
     $scope.deleteUser = function (user) {
         var res = false;
-        res = $.grep($scope.users, function (n, i) {
+        res = $.grep($scope.$parent.users, function (n, i) {
             if (n == user) {
-                $scope.users.splice(i, 1);
+                $scope.$parent.users.splice(i, 1);
                 return true;
             }
         });
@@ -30,6 +30,14 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http) {
         localStorage.setItem("fongas.users", JSON.stringify($scope.users));
     };
 
+    $scope.refreshRepositories = function () {
+        console.log("START");
+        console.log($scope.users);
+        console.log($scope.$parent.users);
+        $scope.loadUserData();
+        $scope.loadUserRepos();
+        console.log($scope.$parent.repos)
+    };
 
     /**
      * REPOSITORIES
@@ -48,20 +56,20 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http) {
         };
 
         if (!$scope.isRepoWatchEnabled(newRepo)) {
-            $scope.repos.push(newRepo);
+            $scope.$parent.repos.push(newRepo);
             $scope.github.name = "";
             $scope.github.url = "";
             $scope.github.token = "";
-            localStorage.setItem("fongas.repos", JSON.stringify($scope.repos));
+            localStorage.setItem("fongas.repos", JSON.stringify($scope.$parent.repos));
         }
     };
 
     $scope.deleteRepository = function (repo) {
-        var x = $.grep($scope.repos, function (n, i) {
+        var x = $.grep($scope.$parent.repos, function (n, i) {
             return n.id != repo.id;
         });
         $scope.repos = x;
-        localStorage.setItem("fongas.repos", JSON.stringify($scope.repos));
+        localStorage.setItem("fongas.repos", JSON.stringify($scope.$parent.repos));
     };
 
     $scope.isRepoWatchEnabled = function isRepoWatchEnabled(repo) {
@@ -82,9 +90,10 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http) {
         // read users from local storage
         var users = localStorage.getItem("fongas.users");
         if (users !== null) {
-            $scope.users = JSON.parse(users);
+            $scope.$parent.users = JSON.parse(users);
+            //$scope.users = JSON.parse(users);
         } else {
-            localStorage.setItem("fongas.users", JSON.stringify($scope.users));
+            localStorage.setItem("fongas.users", JSON.stringify($scope.$parent.users));
         }
 
         // enrich the user object with user data and repos from github etc.
@@ -94,9 +103,9 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http) {
         // read repos from session storage
         var repo = localStorage.getItem("fongas.repos");
         if (repo !== null) {
-            $scope.repos = JSON.parse(repo);
+            $scope.$parent.repos = JSON.parse(repo);
         } else {
-            localStorage.setItem("fongas.repos", JSON.stringify($scope.repos));
+            localStorage.setItem("fongas.repos", JSON.stringify($scope.$parent.repos));
         }
     };
     $scope.init();
