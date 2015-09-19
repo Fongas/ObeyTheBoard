@@ -4,7 +4,7 @@ $ = jQuery;
  * Created by torstenzwoch on 30.05.14.
  */
 /* AngularJS - change standard placeholder */
-var module = angular.module('github', ['ngSanitize', 'LocalStorageModule', 'nl2br', 'angularLocalStorage', 'angular-sortable-view', 'ngRoute', 'ngAnimate', 'isteven-multi-select']);
+var module = angular.module('github', ['ngSanitize', 'LocalStorageModule', 'nl2br', 'angularLocalStorage', 'angular-sortable-view', 'ngRoute', 'ngAnimate', 'isteven-multi-select', 'ui.bootstrap']);
 module.config(['$interpolateProvider', '$compileProvider', 'localStorageServiceProvider', function ($interpolateProvider, $compileProvider, localStorageServiceProvider) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
@@ -52,9 +52,27 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
     $scope.tags = [];
     $scope.availableTags = [];
     $scope.selectedTags = [];
-    $scope.selectedStates=[];
+    $scope.selectedStates = [];
     $scope.availableRepoStates = [];
     $scope.showSelect = true;
+    $scope.defaultBoardLabels = [
+        {
+            "name": "BOARD: BACKLOG",
+            "color": "207de5"
+        },
+        {
+            "name": "BOARD: NEXT",
+            "color": "FF0000"
+        },
+        {
+            "name": "BOARD: DOING",
+            "color": "FFB200"
+        },
+        {
+            "name": "BOARD: DONE",
+            "color": "00B000"
+        }
+    ];
 
     // Repos to watch of the current user
     $scope.repos = [];
@@ -82,25 +100,25 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
             {
                 'name': 'Backlog',
                 'tags': [],
-                'states':[],
+                'states': [],
                 'issues': []
             },
             {
                 'name': 'Next',
                 'tags': [],
-                'states':[],
+                'states': [],
                 'issues': []
             },
             {
                 'name': 'Doing',
                 'tags': [],
-                'states':[],
+                'states': [],
                 'issues': []
             },
             {
                 'name': 'Done',
                 'tags': [],
-                'states':[],
+                'states': [],
                 'issues': []
             }
         ]
@@ -189,7 +207,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                             $scope.availableTags[index][indexCol] = tmpAvailableTags;
 
 
-                            if($scope.boards[index].columns[indexCol].states == undefined){
+                            if ($scope.boards[index].columns[indexCol].states == undefined) {
                                 $scope.boards[index].columns[indexCol].states = [];
                             }
                             $scope.selectedStates = $scope.boards[index].columns[indexCol].states;
@@ -315,6 +333,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
         });
     };
 
+
     $scope.loadUserRepos = function (currentUser) {
         var random = Math.random();
         $.each($scope.users, function (repoIndex, repoValue) {
@@ -333,6 +352,68 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                     localStorage.setItem("fongas.users", JSON.stringify($scope.users));
                 });
             });
+        });
+    };
+
+    $scope.updateIssues = function (oldIssue, newIssue) {
+        var random = Math.random();
+        var user = $.grep($scope.users, function (n, i) {
+            return (n.user.id == oldIssue.user.id);
+        });
+        if (user != undefined && user.length > 0) {
+            var url = oldIssue.url.replace("://", '://' + user[0].token + ':x-oauth-basic@');
+            $.ajax({
+                url: url,
+                type: 'PATCH',
+                data: JSON.stringify(newIssue),
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "token " + user[0].token + "");
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                }
+            }).done(function (response) {
+                $scope.$apply(function () {
+                    //$scope.users[repoIndex].user = response;
+                });
+            });
+        } else {
+            console.warn("Keinen Benutzer für das Update gefunden.");
+        }
+    };
+
+
+    $scope.getLabels = function (repo, user) {
+        var labelUrl = repo.labels_url.replace("{/name}", "");
+
+        var url = labelUrl.replace("://", '://' + user.token + ':x-oauth-basic@');
+        return $.ajax({
+            url: url,
+            type: 'GET',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", "token " + user.token + "");
+            }
+        }).done(function (response) {
+            return response;
+        },function () {
+            return null;
+        });
+    };
+
+    $scope.addLabel = function (repo, label, user) {
+        var labelUrl = repo.labels_url.replace("{/name}", "");
+
+        var url = labelUrl.replace("://", '://' + user.token + ':x-oauth-basic@');
+        return $.ajax({
+            url: url,
+            type: 'POST',
+            data: JSON.stringify(label),
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", "token " + user.token + "");
+                xhr.setRequestHeader("Content-Type", "application/json");
+            }
+        }).done(function (response) {
+            return response;
+        },function () {
+            return null;
         });
     };
 };

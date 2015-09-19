@@ -26,12 +26,6 @@
                  directive-id="$index"
                     >
             </div>
-            <select name="singleSelect" ng-model="column.selectedStates" ng-change="saveBoards(0, $index)">
-                <optgroup label="Github States">
-                    <option value="open" ng-selected="column.selectedStates == 'open'">Open</option>
-                    <option value="closed" ng-selected="column.selectedStates == 'closed'">Closed</option>
-                </optgroup>
-            </select>
         </div>
     </div>
     <div class="row" ng-if="showSelect">
@@ -48,6 +42,13 @@
                 <div ng-repeat="item in column.tags"
                      class="multi panel bs-callout bs-callout-warning card" style="border-color: #[[item.color]];">
                     [[item.name]] [[item.repo]]
+                    <select name="singleSelect" ng-model="item.state" ng-change="saveBoards(0, $index)"
+                            placeholder="Ticket Status...">
+                        <optgroup label="Github States">
+                            <option value="open" ng-selected="item.state == 'open'">Open</option>
+                            <option value="closed" ng-selected="item.state == 'closed'">Closed</option>
+                        </optgroup>
+                    </select>
                 </div>
             </div>
         </div>
@@ -56,40 +57,43 @@
 
     <!-- Columns START -->
     <div class="row" ng-hide="false" ng-if="showSelect">
-        <div class="multi-multi-sortable" ng-repeat="column in $parent.boards[0].columns track by $index">
-            <div class="sortable-container col-xs-2 block head bg-dot20" sv-root="multiple_{{$odd}}"
-                 sv-part="column.issues" sv-on-sort="sort($item, $partFrom, $partTo, $indexFrom, $indexTo, $index)"
-                 sv-on-stop="end($item, $part, $index)">
-                <div class="panel-heading trans-background">
-                    <span class="panel-header-title">[[column.name]] ([[column.issues.length]])</span>
-                </div>
-                <div class="side pull-right">
-                    <ul class="buttons">
-                        <li><a href="#"><span class="icon-cogs"></span></a></li>
-                    </ul>
-                </div>
-                <div ng-repeat="item in column.issues" sv-element
-                     class="multi panel bs-callout bs-callout-warning card">
-                    <div class="row">
-                        <div class="col-xs-9">
-                            <h1>[[item.title]] [[item.state]]</h1>
-                            <p>
-                                <a href="[[item.html_url]]"
-                                   target="_blank" class="transicion" title="Ticket [[item.number]]"
-                                   alt="Ticket [[item.number]]"> <i class="fa fa-github"></i></a>
-                                <a href="[[item.html_url]]"
-                                   target="_blank" class="transicion" title="[[item.comments]] Kommentare"
-                                   alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
-                                <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
-                                <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
-                                [[item.milestone.title]]<br><br>
+        <div ng-repeat="board in $parent.boards track by $index" ng-init="boardIndex = $index">
+            <div class="multi-multi-sortable" ng-repeat="column in $parent.boards[$index].columns track by $index">
+                <div class="sortable-container col-xs-2 block head bg-dot20" sv-root="multiple_{{$odd}}"
+                     sv-part="column.issues" sv-on-sort="sort($item, $partFrom, $partTo, $indexFrom, $indexTo, $index,$parent.boardIndex)"
+                     sv-on-stop="end($item, $part, $index)">
+                    <div class="panel-heading trans-background">
+                        <span class="panel-header-title">[[column.name]] ([[column.issues.length]])</span>
+                    </div>
+                    <div class="side pull-right">
+                        <ul class="buttons">
+                            <li><a href="#"><span class="icon-cogs"></span></a></li>
+                        </ul>
+                    </div>
+                    <div ng-repeat="item in column.issues" sv-element
+                         class="multi panel bs-callout bs-callout-warning card">
+                        <div class="row">
+                            <div class="col-xs-9">
+                                <h1>[[item.title]] #[[item.number]]</h1>
+
+                                <p>
+                                    <a href="[[item.html_url]]"
+                                       target="_blank" class="transicion" title="Ticket [[item.number]]"
+                                       alt="Ticket [[item.number]]"> <i class="fa fa-github"></i></a>
+                                    <a href="[[item.html_url]]"
+                                       target="_blank" class="transicion" title="[[item.comments]] Kommentare"
+                                       alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
+                                    <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
+                                    <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
+                                    [[item.milestone.title]]<br><br>
                                     <span class="label label-default" style="background-color: [[label.color]];"
                                           ng-repeat="label in item.labels track by $index">[[label.name]]</span>
-                            </p>
+                                </p>
+                            </div>
+                            <div class="col-xs-3"><a href="[[item.assignee.html_url]]" target="_blank"><img
+                                    src="[[item.assignee.avatar_url]]" ng-show="item.assignee" class="user-photo"
+                                    title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></div>
                         </div>
-                        <div class="col-xs-3"><a href="[[item.assignee.html_url]]" target="_blank"><img
-                                src="[[item.assignee.avatar_url]]" ng-show="item.assignee" class="user-photo"
-                                title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></div>
                     </div>
                 </div>
             </div>

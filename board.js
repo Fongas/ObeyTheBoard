@@ -36,41 +36,92 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
      }
      };
      */
-    $scope.saveBoards = function (boardIndex,colIndex) {
+    $scope.saveBoards = function (boardIndex, colIndex) {
         if ($scope.boards !== undefined) {
+            //console.log($scope.boards);
             $scope.boards[boardIndex].columns[colIndex].tags = $scope.boards[boardIndex].columns[colIndex].selectedTags;
             $scope.boards[boardIndex].columns[colIndex].states = $scope.boards[boardIndex].columns[colIndex].selectedStates;
             localStorage.setItem("fongas.boards", JSON.stringify($scope.boards));
+            //console.log($scope.boards);
         }
     };
 
-    $scope.sort = function ($item, $partFrom, $partTo, $indexFrom, $indexTo, $index) {
-        console.log($item);
-        console.log($partFrom);
-        console.log($partTo);
-        console.log($indexFrom);
-        console.log($indexTo);
-        console.log($index);
+    $scope.sort = function ($item, $partFrom, $partTo, $indexFrom, $indexTo, $index, $indexBoard) {
+        //console.log("SORT");
+        console.log($item); //verschobenens item
+        //console.log($partFrom); //Array alte Spalte komplett
+        //console.log($partTo); //Array neue Spalte komplett
+        //console.log($indexFrom); // Platz in der als Spalte
+        //console.log($indexTo); //Platz in der neuen Spalte
+        //console.log($index); //kommt aus Spalte
+
+        console.log("$indexBoard");
+        console.log($indexBoard);
+        //spalten nach dem $item durchgehen
+        var targetColumn = null;
+        //$.each($scope.boards, function (boardIndex, boardValue) {
+        $.each($scope.boards[$indexBoard].columns, function (columnIndex, columnValue) {
+            var res = $.grep($scope.boards[$indexBoard].columns[columnIndex].issues, function (n, i) {
+                return (n.id == $item.id && n.url == $item.url);
+            });
+            if (res != undefined && res.length > 0) {
+                targetColumn = columnIndex;
+                console.log(targetColumn);
+                return false; //break
+            }
+        });
+        //});
+
+        var newLabels = [];
+        var state = undefined;
+
+        // get new BOARD tag
+        $.each($scope.boards[$indexBoard].columns[targetColumn].tags, function (indexTags, valueTags) {
+            console.log("Colum Tags: ");
+            console.log($scope.boards[$indexBoard].columns[targetColumn].tags);
+            newLabels.push($scope.boards[$indexBoard].columns[targetColumn].tags[indexTags].name);
+            if (state !== undefined && $scope.boards[$indexBoard].columns[targetColumn].tags[indexTags].state != state) {
+                console.warn("Die Labels für ein und das gleiche Repo haben unterschiedliche Stati hinterlegt!");
+            }
+            state = $scope.boards[$indexBoard].columns[targetColumn].tags[indexTags].state;
+        });
+
+        //clean old BOARD tags and add only the other tags
+        $.each($item.labels, function (indexTags, valueTags) {
+            if($item.labels[indexTags].name.indexOf("BOARD") == -1){
+                newLabels.push($item.labels[indexTags].name);
+            }
+        });
+
+        var issue = {
+            "title": $item.title,
+            "body": $item.body,
+            "assignee": $item.assignee.login,
+            "milestone": $item.milestone.number,
+            "state": state,
+            "labels": newLabels
+        };
+        console.log(issue);
+        $scope.updateIssues($item,issue);
     };
 
     $scope.end = function ($item, $part, $index) {
-        console.log("check");
-        console.log($item);
-        console.log($part);
-        console.log($index);
+        //console.log("END");
+        //console.log($item);
+        //console.log($part); //Altes Array
+        //console.log($index);
     };
 
 
+    $scope.$watch('boards[0].columns', function (newValue, oldValue) {
+        //console.log("NEW");
+        //console.log(newValue);
 
-    $scope.$watch('boards[0].columns', function(newValue, oldValue) {
-        console.log("NEW");
-        console.log(newValue);
-
-        console.log("OLD");
-        console.log(oldValue);
+        //console.log("OLD");
+        //console.log(oldValue);
     });
 
-    $scope.isOpen = function(item) {
+    $scope.isOpen = function (item) {
         if (item.state == "open") {
             return true;
         }
@@ -78,13 +129,13 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         return false;
     };
 
-    $scope.show = function() {
-        console.log($scope.boards);
+    $scope.show = function () {
+        //console.log($scope.boards);
 
 
         $scope.showSelect = true;
     };
-    $scope.hide = function() {
+    $scope.hide = function () {
         console.log($scope.boards);
         $scope.showSelect = false;
     };
