@@ -1396,3 +1396,11 @@ span {
     height: 250px;
     overflow: scroll;
 }
+
+.multi-multi-sortable .sortable-container.no-padding{
+    padding: 0px;
+}
+
+.card{
+    margin: 10px 10px;
+}

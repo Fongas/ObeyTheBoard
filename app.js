@@ -101,25 +101,29 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                 'name': 'Backlog',
                 'tags': [],
                 'states': [],
-                'issues': []
+                'issues': [],
+                'color': '#5319e7'
             },
             {
                 'name': 'Next',
                 'tags': [],
                 'states': [],
-                'issues': []
+                'issues': [],
+                'color': '#e11d21'
             },
             {
                 'name': 'Doing',
                 'tags': [],
                 'states': [],
-                'issues': []
+                'issues': [],
+                'color': '#fbca04'
             },
             {
                 'name': 'Done',
                 'tags': [],
                 'states': [],
-                'issues': []
+                'issues': [],
+                'color': '#009800'
             }
         ]
     };
@@ -129,16 +133,43 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
     };
 
     $scope.$watch('boards', function (newValue, oldValue) {
-        console.error($scope.boards);
         if ($scope.boards !== undefined) {
-            console.log($scope.boards);
             localStorage.setItem("fongas.boards", JSON.stringify($scope.boards));
         }
     });
 
     $scope.$watch('selectedTags', function (newValue, oldValue) {
-        console.log($scope.selectedTags);
+        //console.log($scope.selectedTags);
     });
+
+    $scope.getBudgetTime = function (item) {
+        var regLine = new RegExp("\n", "g");
+        var regClock = new RegExp(":clock1:", "g");
+        var lineArray = item.body.split(regLine);
+        var result = "";
+
+        $.each(lineArray, function (index, value) {
+            if(lineArray[index].search(regClock) != -1){
+                result = lineArray[index].replace(regClock,"").trim();
+            }
+        });
+        return result;
+    };
+
+    $scope.getUsedTime = function (item) {
+        var regLine = new RegExp("\n", "g");
+        var regUsed = new RegExp(":\+1:", "g");
+        var lineArray = item.body.split(regLine);
+        var result = "";
+
+        $.each(lineArray, function (index, value) {
+            if(lineArray[index].search(/:\+1:/) != -1){
+                result = lineArray[index].replace(/:\+1:/,"").trim().split('-')[0];
+            }
+        });
+
+        return result;
+    };
 
     // load data from VersionControl (github)
     $scope.loadTags = function (repos, boards) {
@@ -257,7 +288,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                 $scope.$apply(function () {
                     /* EINORDNEN DER TICKETS IN DIE COLUMNS ANHAND DER HINTERLEGTEN TAGS PRO COLUMN*/
                     var board = angular.copy($scope.boards);
-                    console.log(response);
+
                     // EACH TICKET
                     $.each(response, function (index, value) {
                         //CHECK EACH BOARD
@@ -270,47 +301,33 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                                         return (n.name == $scope.boards[indexBoard].columns[indexColumn].tags[indexTags].name && n.url == $scope.boards[indexBoard].columns[indexColumn].tags[indexTags].url);
                                     });
 
-
                                     if (isSelected.length > 0) {
-                                        console.log(response[index].state);
+
                                         var isIssueInList = $.grep($scope.boards[indexBoard].columns[indexColumn].issues, function (n, i) {
                                             return (n.id == response[index].id);
                                         });
-                                        if (isIssueInList == 0) {
+
+                                        if (isIssueInList.length == 0) {
                                             $scope.boards[indexBoard].columns[indexColumn].issues.push(response[index]);
                                         }
                                     }
                                 });
 
                                 /* clean Repo from state */
-                                var newList = $.grep($scope.boards[indexBoard].columns[indexColumn].issues, function (n, i) {
+                                /*var newList = $.grep($scope.boards[indexBoard].columns[indexColumn].issues, function (n, i) {
                                     return (n.state == $scope.boards[indexBoard].columns[indexColumn].states);
                                 });
-                                $scope.boards[indexBoard].columns[indexColumn].issues = newList;
 
+                                $scope.boards[indexBoard].columns[indexColumn].issues = newList;
+                                */
+                                $scope.showSelect = true;
                             });
                         });
 
-                        //prüfen ob die ID in den Spalten vohanden ist
-                        /*var issueAlreadyPlanned = false;
-                         $.each($scope.boards.columns, function (index2, value2) {
-                         response[index]['id']
-                         var resIndex = $scope.findIndexByKeyValue($scope.boards.columns[index2].issues, "id", response[index]['id']);
-                         if (resIndex !== null) {
-                         angular.extend($scope.boards.columns[index2].issues[resIndex], response[index]);
-                         response.splice(index, 1);
-                         issueAlreadyPlanned = true;
-                         }
-                         });
-                         if (!issueAlreadyPlanned) {
-                         var tmp = new Array();
-                         tmp.push(response[index]);
-                         $scope.repos[repoIndex].issues.push(response[index]);
-                         }*/
                     });
 
                     //$scope.boards = board;
-                    $scope.showSelect = true;
+                    //$scope.showSelect = true;
                 });
             });
         });
@@ -362,7 +379,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
         });
         if (user != undefined && user.length > 0) {
             var url = oldIssue.url.replace("://", '://' + user[0].token + ':x-oauth-basic@');
-            $.ajax({
+            return $.ajax({
                 url: url,
                 type: 'PATCH',
                 data: JSON.stringify(newIssue),
@@ -371,9 +388,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                     xhr.setRequestHeader("Content-Type", "application/json");
                 }
             }).done(function (response) {
-                $scope.$apply(function () {
-                    //$scope.users[repoIndex].user = response;
-                });
+                return response;
             });
         } else {
             console.warn("Keinen Benutzer für das Update gefunden.");
@@ -393,7 +408,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
             }
         }).done(function (response) {
             return response;
-        },function () {
+        }, function () {
             return null;
         });
     };
@@ -412,7 +427,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
             }
         }).done(function (response) {
             return response;
-        },function () {
+        }, function () {
             return null;
         });
     };

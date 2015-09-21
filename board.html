@@ -30,7 +30,7 @@
     </div>
     <div class="row" ng-if="showSelect">
         <div class="multi-multi-sortable" ng-repeat="column in boards[0].columns track by $index">
-            <div class="sortable-container col-xs-2 block head bg-dot20">
+            <div class="sortable-container col-xs-2 block head bg-dot20 no-padding">
                 <div class="panel-heading trans-background">
                     <span class="panel-header-title">[[column.name]]</span>
                 </div>
@@ -59,10 +59,10 @@
     <div class="row" ng-hide="false" ng-if="showSelect">
         <div ng-repeat="board in $parent.boards track by $index" ng-init="boardIndex = $index">
             <div class="multi-multi-sortable" ng-repeat="column in $parent.boards[$index].columns track by $index">
-                <div class="sortable-container col-xs-2 block head bg-dot20" sv-root="multiple_{{$odd}}"
+                <div class="sortable-container col-xs-2 block head bg-dot20 panel panel-default no-padding" sv-root="multiple_{{$odd}}"
                      sv-part="column.issues" sv-on-sort="sort($item, $partFrom, $partTo, $indexFrom, $indexTo, $index,$parent.boardIndex)"
                      sv-on-stop="end($item, $part, $index)">
-                    <div class="panel-heading trans-background">
+                    <div class="panel-heading trans-background" style="border-left:5px [[column.color]] solid;">
                         <span class="panel-header-title">[[column.name]] ([[column.issues.length]])</span>
                     </div>
                     <div class="side pull-right">
@@ -75,17 +75,21 @@
                         <div class="row">
                             <div class="col-xs-9">
                                 <h1>[[item.title]] #[[item.number]]</h1>
-
-                                <p>
-                                    <a href="[[item.html_url]]"
-                                       target="_blank" class="transicion" title="Ticket [[item.number]]"
-                                       alt="Ticket [[item.number]]"> <i class="fa fa-github"></i></a>
+                                <p><br>
                                     <a href="[[item.html_url]]"
                                        target="_blank" class="transicion" title="[[item.comments]] Kommentare"
                                        alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
                                     <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
                                     <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
-                                    [[item.milestone.title]]<br><br>
+                                    [[item.milestone.title]]
+                                    &nbsp;&nbsp;<i class="fa fa-clock-o"></i> [[getBudgetTime(item)]]
+                                    &nbsp;&nbsp;<i class="fa fa-thumbs-o-up"></i> [[getUsedTime(item)]]
+                                    <br>
+                                    <a href="[[item.html_url]]"
+                                       target="_blank" class="transicion" title="Ticket [[item.number]]"
+                                       alt="Ticket [[item.number]]"> <i class="fa fa-github"></i> [[getRepoName(item)]]</a>
+                                </p>
+                                <p>
                                     <span class="label label-default" style="background-color: [[label.color]];"
                                           ng-repeat="label in item.labels track by $index">[[label.name]]</span>
                                 </p>

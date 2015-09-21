@@ -46,17 +46,17 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         }
     };
 
+
     $scope.sort = function ($item, $partFrom, $partTo, $indexFrom, $indexTo, $index, $indexBoard) {
         //console.log("SORT");
-        console.log($item); //verschobenens item
+        //console.log($item); //verschobenens item
         //console.log($partFrom); //Array alte Spalte komplett
         //console.log($partTo); //Array neue Spalte komplett
         //console.log($indexFrom); // Platz in der als Spalte
         //console.log($indexTo); //Platz in der neuen Spalte
         //console.log($index); //kommt aus Spalte
 
-        console.log("$indexBoard");
-        console.log($indexBoard);
+
         //spalten nach dem $item durchgehen
         var targetColumn = null;
         //$.each($scope.boards, function (boardIndex, boardValue) {
@@ -66,7 +66,6 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
             });
             if (res != undefined && res.length > 0) {
                 targetColumn = columnIndex;
-                console.log(targetColumn);
                 return false; //break
             }
         });
@@ -77,8 +76,6 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
 
         // get new BOARD tag
         $.each($scope.boards[$indexBoard].columns[targetColumn].tags, function (indexTags, valueTags) {
-            console.log("Colum Tags: ");
-            console.log($scope.boards[$indexBoard].columns[targetColumn].tags);
             newLabels.push($scope.boards[$indexBoard].columns[targetColumn].tags[indexTags].name);
             if (state !== undefined && $scope.boards[$indexBoard].columns[targetColumn].tags[indexTags].state != state) {
                 console.warn("Die Labels für ein und das gleiche Repo haben unterschiedliche Stati hinterlegt!");
@@ -88,7 +85,7 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
 
         //clean old BOARD tags and add only the other tags
         $.each($item.labels, function (indexTags, valueTags) {
-            if($item.labels[indexTags].name.indexOf("BOARD") == -1){
+            if ($item.labels[indexTags].name.indexOf("BOARD") == -1) {
                 newLabels.push($item.labels[indexTags].name);
             }
         });
@@ -101,8 +98,15 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
             "state": state,
             "labels": newLabels
         };
-        console.log(issue);
-        $scope.updateIssues($item,issue);
+
+        var issueUpdate = $scope.updateIssues($item, issue);
+
+        issueUpdate.done(function (result) {
+            $scope.$apply(function () {
+                console.log(result);
+                $scope.boards[$indexBoard].columns[targetColumn].issues[$indexTo] = result;
+            });
+        });
     };
 
     $scope.end = function ($item, $part, $index) {
@@ -112,6 +116,10 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         //console.log($index);
     };
 
+    $scope.getRepoName = function ($item, $part, $index) {
+        var name = $item.url.split("/");
+        return name[5];
+    };
 
     $scope.$watch('boards[0].columns', function (newValue, oldValue) {
         //console.log("NEW");
@@ -169,10 +177,16 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         }
 
         // read board with columns from local storage
-        var board = localStorage.getItem("fongas.boards");
-        if (board !== null) {
-            $scope.$parent.boards = JSON.parse(board);
-            //$scope.boards = JSON.parse(board);
+        var boards = localStorage.getItem("fongas.boards");
+        if (boards !== null) {
+            boards = JSON.parse(boards);
+            //CLEAN ISSUES
+            $.each(boards, function (indexBoard, valueBoard) {
+                $.each(boards[indexBoard].columns, function (indexColumn, valueColumn) {
+                    boards[indexBoard].columns[indexColumn].issues = [];
+                });
+            });
+            $scope.$parent.boards = boards;
         } else {
             //set board template as default
             $scope.boards = [];

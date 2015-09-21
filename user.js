@@ -31,12 +31,8 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http, $modal) {
         };
 
         $scope.refreshRepositories = function () {
-            console.log("START");
-            console.log($scope.users);
-            console.log($scope.$parent.users);
             $scope.loadUserData();
             $scope.loadUserRepos();
-            console.log($scope.$parent.repos)
         };
 
         /**
@@ -47,39 +43,42 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http, $modal) {
             var labels = $scope.getLabels(repo, user);
             labels.done(function (result) {
                 $scope.items = angular.copy($scope.$parent.defaultBoardLabels);
-
+                var showModal = false;
                 $.each($scope.items, function (index, value) {
                     var x = $.grep(result, function (n, i) {
                         return n.name == $scope.items[index].name;
                     });
-                    if(x.length > 0){
+                    if (x.length > 0) {
                         $scope.items[index].exist = true;
+                    } else {
+                        showModal = true;
                     }
                 });
-
-                var modalInstance = $modal.open({
-                    animation: true,
-                    templateUrl: 'modalLabels.html',
-                    controller: 'ModalInstanceCtrl',
-                    size: 200,
-                    resolve: {
-                        items: function () {
-                            return $scope.items;
-                        }
-                    }
-                });
-
-                modalInstance.result.then(function () {
-                    console.log("aktion durchführen");
-                    $.each($scope.items, function (index, value) {
-                        if($scope.items[index].exist == undefined){
-                            $scope.addLabel(repo, $scope.items[index], user);
+                if (showModal) {
+                    var modalInstance = $modal.open({
+                        animation: true,
+                        templateUrl: 'modalLabels.html',
+                        controller: 'ModalInstanceCtrl',
+                        size: 200,
+                        resolve: {
+                            items: function () {
+                                return $scope.items;
+                            }
                         }
                     });
-                }, function () {
-                    // keine Aktion durchführen
-                });
+
+                    modalInstance.result.then(function () {
+                        $.each($scope.items, function (index, value) {
+                            if ($scope.items[index].exist == undefined) {
+                                $scope.addLabel(repo, $scope.items[index], user);
+                            }
+                        });
+                    }, function () {
+                        // keine Aktion durchführen
+                    });
+                }
             });
+
 
             var newRepo = {
                 "id": repo.id,
@@ -149,7 +148,7 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http, $modal) {
     ;
 
 
-UserCtrl.$inject = ['$scope', '$timeout', '$http','$modal'];
+UserCtrl.$inject = ['$scope', '$timeout', '$http', '$modal'];
 module.controller('UserCtrl', UserCtrl);
 
 // Please note that $modalInstance represents a modal window (instance) dependency.
