@@ -1,5 +1,7 @@
 var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
 
+    $scope.settingsOn = false;
+
     $scope.localLang = {
         selectAll: "Tick all",
         selectNone: "Tick none",
@@ -38,28 +40,16 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
      */
     $scope.saveBoards = function (boardIndex, colIndex) {
         if ($scope.boards !== undefined) {
-            //console.log($scope.boards);
             $scope.boards[boardIndex].columns[colIndex].tags = $scope.boards[boardIndex].columns[colIndex].selectedTags;
             $scope.boards[boardIndex].columns[colIndex].states = $scope.boards[boardIndex].columns[colIndex].selectedStates;
             localStorage.setItem("fongas.boards", JSON.stringify($scope.boards));
-            //console.log($scope.boards);
         }
     };
 
 
     $scope.sort = function ($item, $partFrom, $partTo, $indexFrom, $indexTo, $index, $indexBoard) {
-        //console.log("SORT");
-        //console.log($item); //verschobenens item
-        //console.log($partFrom); //Array alte Spalte komplett
-        //console.log($partTo); //Array neue Spalte komplett
-        //console.log($indexFrom); // Platz in der als Spalte
-        //console.log($indexTo); //Platz in der neuen Spalte
-        //console.log($index); //kommt aus Spalte
-
-
         //spalten nach dem $item durchgehen
         var targetColumn = null;
-        //$.each($scope.boards, function (boardIndex, boardValue) {
         $.each($scope.boards[$indexBoard].columns, function (columnIndex, columnValue) {
             var res = $.grep($scope.boards[$indexBoard].columns[columnIndex].issues, function (n, i) {
                 return (n.id == $item.id && n.url == $item.url);
@@ -69,7 +59,6 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
                 return false; //break
             }
         });
-        //});
 
         var newLabels = [];
         var state = undefined;
@@ -103,17 +92,12 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
 
         issueUpdate.done(function (result) {
             $scope.$apply(function () {
-                console.log(result);
                 $scope.boards[$indexBoard].columns[targetColumn].issues[$indexTo] = result;
             });
         });
     };
 
     $scope.end = function ($item, $part, $index) {
-        //console.log("END");
-        //console.log($item);
-        //console.log($part); //Altes Array
-        //console.log($index);
     };
 
     $scope.getRepoName = function ($item, $part, $index) {
@@ -122,11 +106,7 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
     };
 
     $scope.$watch('boards[0].columns', function (newValue, oldValue) {
-        //console.log("NEW");
-        //console.log(newValue);
 
-        //console.log("OLD");
-        //console.log(oldValue);
     });
 
     $scope.isOpen = function (item) {
@@ -137,15 +117,18 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         return false;
     };
 
-    $scope.show = function () {
-        //console.log($scope.boards);
-
-
+    $scope.showBoard = function () {
         $scope.showSelect = true;
     };
-    $scope.hide = function () {
-        console.log($scope.boards);
+    $scope.hideBoard = function () {
         $scope.showSelect = false;
+    };
+
+    $scope.showSettings = function () {
+        $scope.settingsOn = true;
+    };
+    $scope.hideSettings = function () {
+        $scope.settingsOn = false;
     };
 
     $scope.getDatetime = new Date();
@@ -183,7 +166,7 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
             //CLEAN ISSUES
             $.each(boards, function (indexBoard, valueBoard) {
                 $.each(boards[indexBoard].columns, function (indexColumn, valueColumn) {
-                    boards[indexBoard].columns[indexColumn].issues = [];
+                    boards[indexBoard].columns[indexColumn] = $scope.clearColumn(boards[indexBoard].columns[indexColumn])
                 });
             });
             $scope.$parent.boards = boards;

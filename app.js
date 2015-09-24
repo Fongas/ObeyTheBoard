@@ -35,6 +35,48 @@ angular.module('github').config(function ($controllerProvider) {
     module.controllerProvider = $controllerProvider;
 });
 
+module.filter('minutesToHours', function () {
+    return function (input) {
+        var hours = parseInt(parseInt(input) / 60);
+        hours = (isNaN(hours)) ? 0 : hours;
+        var minutes = parseInt(input) % 60;
+        minutes = (isNaN(minutes)) ? 0 : minutes;
+        var result = hours + "h" + minutes + "m";
+        return result;
+    };
+});
+
+module.filter('boardColumnTitle', function () {
+    return function (input) {
+        return input.name + " (" + input.issues.length + ")";
+    };
+});
+
+module.filter('boardColumnStatistic', function (minutesToHoursFilter) {
+    return function (input) {
+        var usedTime = minutesToHoursFilter(input.usedTime);
+        var budgetTime = minutesToHoursFilter(input.budgetTime);
+        var openTime = minutesToHoursFilter(input.openTime);
+        return '<i class="fa fa-clock-o"></i>&nbsp;' + budgetTime + '&nbsp;|&nbsp;<i class="fa fa-thumbs-o-up"></i>&nbsp;' + usedTime + '&nbsp;(open ' + openTime + ')';
+    };
+});
+
+module.filter('issueAssigneeFilter', function () {
+    return function (input, assignee) {
+        //input => column.issues
+        var res = $.grep(input, function (n, i) {
+            if (assignee == null || assignee == undefined) {
+                return true;
+            } else if (n.assignee != null && n.assignee.id == assignee.id) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+        return res;
+    };
+});
+
 var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
     $scope.repositories = [];
     $scope.users = [];
@@ -54,6 +96,10 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
     $scope.selectedTags = [];
     $scope.selectedStates = [];
     $scope.availableRepoStates = [];
+    $scope.assignees = [];
+    $scope.assignees.push({'id':'all','login':'kein Filter'});
+    $scope.assignee = undefined;
+    $scope.showSettings = false;
     $scope.showSelect = true;
     $scope.defaultBoardLabels = [
         {
@@ -149,8 +195,8 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
         var result = "";
 
         $.each(lineArray, function (index, value) {
-            if(lineArray[index].search(regClock) != -1){
-                result = lineArray[index].replace(regClock,"").trim();
+            if (lineArray[index].search(regClock) != -1) {
+                result = lineArray[index].replace(regClock, "").trim();
             }
         });
         return result;
@@ -163,12 +209,42 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
         var result = "";
 
         $.each(lineArray, function (index, value) {
-            if(lineArray[index].search(/:\+1:/) != -1){
-                result = lineArray[index].replace(/:\+1:/,"").trim().split('-')[0];
+            if (lineArray[index].search(/:\+1:/) != -1) {
+                result = lineArray[index].replace(/:\+1:/, "").trim().split('-')[0];
             }
         });
 
         return result;
+    };
+
+    $scope.paseTime = function (time) {
+        if (time == undefined || time == "") {
+            return 0;
+        }
+
+        var regHours = new RegExp("h", "g");
+        var regMinutes = new RegExp("m", "g");
+        var result = 0;
+        var tmpTime = null;
+
+        if (time.search(regHours) != -1 && time.search(regMinutes) != -1) {
+            tmpTime = time.trim().split(/h/);
+            result += parseInt(tmpTime[0].trim()) * 60; //hours
+            result += parseInt(tmpTime[1].trim().split(/m/)[0]); //minute
+        } else if (time.search(regHours) != -1) {
+            result += parseInt(time.trim().split(/h/)[0].trim()) * 60; //hours
+        } else if (time.search(regMinutes) != -1) {
+            result += parseInt(time.trim().split(/m/)[0].trim()); //minute
+        }
+
+        if (isNaN(result)) {
+            return 0;
+        }
+        return result;
+    };
+
+    $scope.getCountIssues = function (boardIndex, columnIndex) {
+        return $scope.boards[boardIndex].columns[columnIndex].issues.length;
     };
 
     // load data from VersionControl (github)
@@ -285,6 +361,8 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                     xhr.setRequestHeader("Authorization", "token " + $scope.repos[repoIndex].token + "");
                 }
             }).done(function (response) {
+                var savedAssignee = JSON.parse(localStorage.getItem("fongas.assignee"));
+
                 $scope.$apply(function () {
                     /* EINORDNEN DER TICKETS IN DIE COLUMNS ANHAND DER HINTERLEGTEN TAGS PRO COLUMN*/
                     var board = angular.copy($scope.boards);
@@ -308,27 +386,51 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                                         });
 
                                         if (isIssueInList.length == 0) {
-                                            $scope.boards[indexBoard].columns[indexColumn].issues.push(response[index]);
+                                            // Ticket to column
+                                            if (savedAssignee == null || savedAssignee == undefined || savedAssignee.id == 'all' ||(response[index].assignee != null && response[index].assignee.id == savedAssignee.id)) {
+                                                var budgetTime = $scope.paseTime($scope.getBudgetTime(response[index]));
+                                                var usedTime = $scope.paseTime($scope.getUsedTime(response[index]));
+                                                if (budgetTime > 0 && usedTime > 0) {
+                                                    $scope.boards[indexBoard].columns[indexColumn].budgetTime += budgetTime;
+                                                    $scope.boards[indexBoard].columns[indexColumn].usedTime += usedTime;
+                                                }
+                                                if (budgetTime > 0 && usedTime == 0) {
+                                                    $scope.boards[indexBoard].columns[indexColumn].openTime += budgetTime;
+                                                }
+
+                                                $scope.boards[indexBoard].columns[indexColumn].issues.push(response[index]);
+                                            }
+
+                                            //preselect assignee
+                                            var assignee = $.grep($scope.assignees, function (n, i) {
+                                                return ( response[index].assignee !== null && n !== null && n.id == response[index].assignee.id);
+                                            });
+
+                                            if (assignee.length == 0 && response[index].assignee != null) {
+                                                $scope.assignees.push(response[index].assignee);
+                                            }
                                         }
                                     }
                                 });
-
-                                /* clean Repo from state */
-                                /*var newList = $.grep($scope.boards[indexBoard].columns[indexColumn].issues, function (n, i) {
-                                    return (n.state == $scope.boards[indexBoard].columns[indexColumn].states);
-                                });
-
-                                $scope.boards[indexBoard].columns[indexColumn].issues = newList;
-                                */
                                 $scope.showSelect = true;
                             });
                         });
+                    });
+                });
 
+
+                if(savedAssignee !== undefined && savedAssignee !== "undefined" && savedAssignee !== null){
+                    var assignee = $.grep($scope.assignees, function (n, i) {
+                        return (n.id == savedAssignee.id);
                     });
 
-                    //$scope.boards = board;
-                    //$scope.showSelect = true;
-                });
+                    if (assignee.length > 0) {
+                        $scope.assignee = assignee[0];
+                    }
+                }
+
+                var scope = angular.element($('#BoardCtrl')).scope();
+                scope.boards = $scope.boards;
             });
         });
     };
@@ -348,6 +450,40 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                 });
             });
         });
+    };
+
+    $scope.refreshTickets = function (assignee) {
+        localStorage.setItem("fongas.assignee", JSON.stringify(assignee));
+        //$timeout(function () {
+        //    $scope.$apply(function () {
+                $scope.showSelect = false;
+                $scope.assignee = assignee;
+                var boards = angular.copy($scope.boards);
+
+                //CLEAN ISSUES
+                $.each(boards, function (indexBoard, valueBoard) {
+                    $.each(boards[indexBoard].columns, function (indexColumn, valueColumn) {
+                        //boards[indexBoard].columns[indexColumn] =  $scope.clearColumn(boards[indexBoard].columns[indexColumn])
+                        boards[indexBoard].columns[indexColumn].issues = [];
+                        boards[indexBoard].columns[indexColumn].budgetTime = 0;
+                        boards[indexBoard].columns[indexColumn].usedTime = 0;
+                        boards[indexBoard].columns[indexColumn].openTime = 0;
+                    });
+                });
+                $scope.boards = boards;
+                $scope.loadIssues();
+        //    });
+            $scope.showSelect = true;
+        //}, 100);
+
+    };
+
+    $scope.clearColumn = function (column) {
+        column.issues = [];
+        column.budgetTime = 0;
+        column.usedTime = 0;
+        column.openTime = 0;
+        return column;
     };
 
 
