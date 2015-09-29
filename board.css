@@ -1122,6 +1122,7 @@ input, select, textarea {
 
 select {
     padding: 6px 8px;
+    height: 30px;
 }
 
 select option {
@@ -4215,5 +4216,13 @@ span {
 
 .panel-header-title.statistic {
     flex: 1 auto;
+}
+
+.filter{
+    flex: 0 0 100px;
+}
+
+.filter-select{
+    flex: 1 1 auto;
 }
 

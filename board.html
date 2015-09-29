@@ -4,10 +4,40 @@
             <button type="button" ng-click="go('/board');" class="btn btn-default">Board</button>
             <button type="button" ng-click="go('/user');" class="btn btn-default">User</button>
             <button type="button" ng-click="refreshAllData();" class="btn btn-default">Refresh all Data</button>
-            <button type="button" ng-hide="showSelect" ng-click="showBoard();" class="btn btn-default">show Board</button>
-            <button type="button" ng-show="showSelect" ng-click="hideBoard();" class="btn btn-default">hide Board</button>
-            <button type="button" ng-hide="settingsOn" ng-click="showSettings();" class="btn btn-default">show Settings</button>
-            <button type="button" ng-show="settingsOn" ng-click="hideSettings();" class="btn btn-default">hide Settings</button>
+            <button type="button" ng-hide="showSelect" ng-click="showBoard();" class="btn btn-default">show Board
+            </button>
+            <button type="button" ng-show="showSelect" ng-click="hideBoard();" class="btn btn-default">hide Board
+            </button>
+            <button type="button" ng-hide="settingsOn" ng-click="showSettings();" class="btn btn-default">show
+                Settings
+            </button>
+            <button type="button" ng-show="settingsOn" ng-click="hideSettings();" class="btn btn-default">hide
+                Settings
+            </button>
+        </div>
+    </div>
+    <div class="space-24"></div>
+    <div style="display:flex; flex-flow: row wrap;align-items: center;">
+        <div ng-repeat="assignee in assignees" class="filter-select" ng-if="assignee.id != 'all'">
+            <div style="display:flex; flex-flow: row wrap;align-items: center;">
+                <div style="-webkit-flex: 1;flex: 0 0 80px;">
+                    <a href="[[assignee.html_url]]" target="_blank"><img src="[[assignee.avatar_url]]" ng-show="assignee" class="user-photo" title="[[assignee.login]]" alt="[[assignee.login]]"/></a>
+                </div>
+                <div style="-webkit-flex: 1;flex: 1;">
+                    <b>[[assignee.login]]</b>
+                </div>
+            </div>
+            <br>
+            <div style="display:flex; flex-flow: row wrap;align-items: center;">
+                <div style="-webkit-flex: 1;flex: 0 0 80px;">
+                    <i class="fa fa-clock-o"></i> [[assignee.budgetTime | minutesToHours]]<br>
+                    <i class="fa fa-thumbs-o-up"></i> [[assignee.usedTime | minutesToHours]]<br>
+                </div>
+                <div style="-webkit-flex: 1;flex: 1;">
+                    <i class="fa fa-flag-checkered"></i> [[assignee.openTime | minutesToHours]]<br>
+                    <i class="fa fa-ticket"></i> [[assignee.openTickets]]&nbsp;&nbsp;(<i class="fa fa-clock-o"></i> [[assignee.openTicketsWithBudget]] / <i class="fa fa-ban"></i> [[assignee.openTicketsWithoutBudget]])
+                </div>
+            </div>
         </div>
     </div>
     <div class="space-24"></div>
@@ -33,28 +63,28 @@
     <div class="row" ng-if="settingsOn">
         <div class="multi-multi-sortable col-xs-3" ng-repeat="column in boards[0].columns track by $index">
             <div class="row" style="padding: 5px;">
-                    <div class="sortable-container block head bg-dot20 no-padding col-xs-12">
-                        <div class="panel-heading trans-background">
-                            <span class="panel-header-title">[[column.name]]</span>
-                        </div>
-                        <div class="side pull-right">
-                            <ul class="buttons">
-                                <li><a href="#"><span class="icon-cogs"></span></a></li>
-                            </ul>
-                        </div>
-                        <div ng-repeat="item in column.tags"
-                             class="multi panel bs-callout bs-callout-warning card"
-                             style="border-color: #[[item.color]];">
-                            [[item.name]] [[item.repo]]
-                            <select name="singleSelect" ng-model="item.state" ng-change="saveBoards(0, $index)"
-                                    placeholder="Ticket Status...">
-                                <optgroup label="Github States">
-                                    <option value="open" ng-selected="item.state == 'open'">Open</option>
-                                    <option value="closed" ng-selected="item.state == 'closed'">Closed</option>
-                                </optgroup>
-                            </select>
-                        </div>
+                <div class="sortable-container block head bg-dot20 no-padding col-xs-12">
+                    <div class="panel-heading trans-background">
+                        <span class="panel-header-title">[[column.name]]</span>
                     </div>
+                    <div class="side pull-right">
+                        <ul class="buttons">
+                            <li><a href="#"><span class="icon-cogs"></span></a></li>
+                        </ul>
+                    </div>
+                    <div ng-repeat="item in column.tags"
+                         class="multi panel bs-callout bs-callout-warning card"
+                         style="border-color: #[[item.color]];">
+                        [[item.name]] [[item.repo]]
+                        <select name="singleSelect" ng-model="item.state" ng-change="saveBoards(0, $index)"
+                                placeholder="Ticket Status...">
+                            <optgroup label="Github States">
+                                <option value="open" ng-selected="item.state == 'open'">Open</option>
+                                <option value="closed" ng-selected="item.state == 'closed'">Closed</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -62,62 +92,74 @@
 
     <!-- Columns START -->
     <div ng-hide="false" ng-if="showSelect">
-        <select ng-model="$parent.assignee" ng-options="item.login for item in $parent.assignees" ng-change="refreshTickets($parent.assignee)">
-        </select>
+        <div class="row">
+            <div class="col-xs-3 pull-right" style="display:flex; flex-flow: row wrap;align-items: center;">
+                <span class="filter">Filtern nach:</span>
+                <span class="filter-select">
+                    <select ng-model="$parent.assignee" ng-options="item.login for item in $parent.assignees"
+                            ng-change="refreshTickets($parent.assignee)">
+                    </select>
+                </span>
+            </div>
+        </div>
         <div ng-repeat="board in $parent.boards track by $index" ng-init="boardIndex = $index" class="row">
-            <div class="multi-multi-sortable col-xs-3" ng-repeat="column in $parent.boards[$index].columns track by $index">
-                    <div class="row" style="padding: 5px;">
-                        <div class="panel-heading trans-background col-xs-12"
-                             style="border-left:5px [[column.color]] solid;">
+            <div class="multi-multi-sortable col-xs-3"
+                 ng-repeat="column in $parent.boards[$index].columns track by $index">
+                <div class="row" style="padding: 5px;">
+                    <div class="panel-heading trans-background col-xs-12"
+                         style="border-left:5px [[column.color]] solid;">
                             <span class="panel-header-title">
                                 <span ng-bind-html="column | boardColumnTitle" class="pull-left title"></span>
                                 <span ng-bind-html="column | boardColumnStatistic" class="pull-right statistic"></span>
                                 <span ng-bind="column.openTime" class="pull-right statistic"></span>
                             </span>
+                    </div>
+                    <div class="sortable-container col-xs-12 block head bg-dot20 panel panel-default no-padding"
+                         sv-root="multiple_{{$odd}}"
+                         sv-part="column.issues"
+                         sv-on-sort="sort($item, $partFrom, $partTo, $indexFrom, $indexTo, $index,$parent.boardIndex)"
+                         sv-on-stop="end($item, $part, $index)">
+                        <div class="side pull-right">
+                            <ul class="buttons">
+                                <li><a href="#"><span class="icon-cogs"></span></a></li>
+                            </ul>
                         </div>
-                        <div class="sortable-container col-xs-12 block head bg-dot20 panel panel-default no-padding"
-                             sv-root="multiple_{{$odd}}"
-                             sv-part="column.issues"
-                             sv-on-sort="sort($item, $partFrom, $partTo, $indexFrom, $indexTo, $index,$parent.boardIndex)"
-                             sv-on-stop="end($item, $part, $index)">
-                            <div class="side pull-right">
-                                <ul class="buttons">
-                                    <li><a href="#"><span class="icon-cogs"></span></a></li>
-                                </ul>
-                            </div>
-                            <div ng-repeat="item in column.issues" sv-element
-                                 class="multi panel bs-callout bs-callout-warning card">
-                                <div class="row">
-                                    <div class="col-xs-9">
-                                        <h1>[[item.title]] #[[item.number]]</h1>
-                                        <p><br>
-                                            <a href="[[item.html_url]]"
-                                               target="_blank" class="transicion" title="[[item.comments]] Kommentare"
-                                               alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
-                                            <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
-                                            <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
-                                            [[item.milestone.title]]
-                                            &nbsp;&nbsp;<i class="fa fa-clock-o"></i> [[getBudgetTime(item)]]
-                                            &nbsp;&nbsp;<i class="fa fa-thumbs-o-up"></i> [[getUsedTime(item)]]
-                                            <br>
-                                            <a href="[[item.html_url]]"
-                                               target="_blank" class="transicion" title="Ticket [[item.number]]"
-                                               alt="Ticket [[item.number]]"> <i class="fa fa-github"></i>
-                                                [[getRepoName(item)]]</a>
-                                        </p>
-                                        <p>
+                        <div ng-repeat="item in column.issues" sv-element
+                             class="multi panel bs-callout bs-callout-warning card">
+                            <div class="row">
+                                <div class="col-xs-9">
+                                    <h1>                                        <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
+                                        <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i> [[item.title]]</h1>
+
+                                    <p><br>
+
+                                        <a href="[[item.html_url]]"
+                                           target="_blank" class="transicion" title="Ticket [[item.number]]"
+                                           alt="Ticket [[item.number]]"> <i class="fa fa-github"></i>
+                                            [[getRepoName(item)]]</a><br>
+                                        <i class="fa fa-map-marker"></i>
+                                        [[item.milestone.title]]
+                                        <br>
+                                        <a href="[[item.html_url]]"
+                                           target="_blank" class="transicion" title="[[item.comments]] Kommentare"
+                                           alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
+                                        &nbsp;&nbsp;<i class="fa fa-clock-o"></i> [[getBudgetTime(item)]]
+                                        &nbsp;&nbsp;<i class="fa fa-thumbs-o-up"></i> [[getUsedTime(item)]]
+
+                                    </p>
+                                    <p>
                                             <span class="label label-default" style="background-color: [[label.color]];"
                                                   ng-repeat="label in item.labels track by $index">[[label.name]]</span>
-                                        </p>
-                                    </div>
-                                    <div class="col-xs-3"><a href="[[item.assignee.html_url]]" target="_blank"><img
-                                            src="[[item.assignee.avatar_url]]" ng-show="item.assignee"
-                                            class="user-photo"
-                                            title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></div>
+                                    </p>
                                 </div>
+                                <div class="col-xs-3"><p><a href="[[item.assignee.html_url]]" target="_blank"><img
+                                        src="[[item.assignee.avatar_url]]" ng-show="item.assignee"
+                                        class="user-photo"
+                                        title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></p><p>#[[item.number]]</p></div>
                             </div>
                         </div>
                     </div>
+                </div>
             </div>
         </div>
     </div>

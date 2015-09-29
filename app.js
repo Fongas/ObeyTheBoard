@@ -4,7 +4,7 @@ $ = jQuery;
  * Created by torstenzwoch on 30.05.14.
  */
 /* AngularJS - change standard placeholder */
-var module = angular.module('github', ['ngSanitize', 'LocalStorageModule', 'nl2br', 'angularLocalStorage', 'angular-sortable-view', 'ngRoute', 'ngAnimate', 'isteven-multi-select', 'ui.bootstrap']);
+var module = angular.module('github', ['ngSanitize', 'LocalStorageModule', 'nl2br', 'angularLocalStorage', 'angular-sortable-view', 'ngRoute', 'ngAnimate', 'isteven-multi-select', 'ui.bootstrap','chart.js']);
 module.config(['$interpolateProvider', '$compileProvider', 'localStorageServiceProvider', function ($interpolateProvider, $compileProvider, localStorageServiceProvider) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
@@ -353,6 +353,15 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
     //ISSUES
     $scope.loadIssues = function () {
         var random = Math.random();
+        var savedAssignee = JSON.parse(localStorage.getItem("fongas.assignee"));
+        $.each($scope.assignees, function (indexAssignee, valueAssignee) {
+            $scope.assignees[indexAssignee].budgetTime = 0;
+            $scope.assignees[indexAssignee].usedTime = 0;
+            $scope.assignees[indexAssignee].openTime = 0;
+            $scope.assignees[indexAssignee].openTickets = 0;
+            $scope.assignees[indexAssignee].openTicketsWithoutBudget = 0;
+            $scope.assignees[indexAssignee].openTicketsWithBudget = 0;
+        });
         $.each($scope.repos, function (repoIndex, repoValue) {
             $.ajax({
                 url: 'https://' + $scope.repos[repoIndex].token + ':x-oauth-basic@api.github.com/repos/' + $scope.repos[repoIndex].url + '/issues?state=all&filter=all&random=' + random,
@@ -361,8 +370,6 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                     xhr.setRequestHeader("Authorization", "token " + $scope.repos[repoIndex].token + "");
                 }
             }).done(function (response) {
-                var savedAssignee = JSON.parse(localStorage.getItem("fongas.assignee"));
-
                 $scope.$apply(function () {
                     /* EINORDNEN DER TICKETS IN DIE COLUMNS ANHAND DER HINTERLEGTEN TAGS PRO COLUMN*/
                     var board = angular.copy($scope.boards);
@@ -386,10 +393,11 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                                         });
 
                                         if (isIssueInList.length == 0) {
+                                            var budgetTime = $scope.paseTime($scope.getBudgetTime(response[index]));
+                                            var usedTime = $scope.paseTime($scope.getUsedTime(response[index]));
+
                                             // Ticket to column
                                             if (savedAssignee == null || savedAssignee == undefined || savedAssignee.id == 'all' ||(response[index].assignee != null && response[index].assignee.id == savedAssignee.id)) {
-                                                var budgetTime = $scope.paseTime($scope.getBudgetTime(response[index]));
-                                                var usedTime = $scope.paseTime($scope.getUsedTime(response[index]));
                                                 if (budgetTime > 0 && usedTime > 0) {
                                                     $scope.boards[indexBoard].columns[indexColumn].budgetTime += budgetTime;
                                                     $scope.boards[indexBoard].columns[indexColumn].usedTime += usedTime;
@@ -401,14 +409,38 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                                                 $scope.boards[indexBoard].columns[indexColumn].issues.push(response[index]);
                                             }
 
-                                            //preselect assignee
+                                            // Collect all different assignees
                                             var assignee = $.grep($scope.assignees, function (n, i) {
                                                 return ( response[index].assignee !== null && n !== null && n.id == response[index].assignee.id);
                                             });
 
                                             if (assignee.length == 0 && response[index].assignee != null) {
+                                                response[index].assignee.budgetTime = 0;
+                                                response[index].assignee.usedTime = 0;
+                                                response[index].assignee.openTime = 0;
+                                                response[index].assignee.openTickets = 0;
+                                                response[index].assignee.openTicketsWithoutBudget = 0;
+                                                response[index].assignee.openTicketsWithBudget = 0;
                                                 $scope.assignees.push(response[index].assignee);
                                             }
+
+                                            //push statistic informations to the assignee object
+                                            $.each($scope.assignees, function (indexAssignee, valueAssignee) {
+                                               if(response[index].assignee !== null && $scope.assignees[indexAssignee].id == response[index].assignee.id || $scope.assignees[indexAssignee].id == "all"){
+                                                   if (budgetTime > 0 && usedTime > 0) {
+                                                       $scope.assignees[indexAssignee].budgetTime += budgetTime;
+                                                       $scope.assignees[indexAssignee].usedTime += usedTime;
+                                                   } else if (budgetTime > 0 && usedTime == 0) {
+                                                       $scope.assignees[indexAssignee].openTime += budgetTime;
+                                                       $scope.assignees[indexAssignee].openTickets += 1;
+                                                       $scope.assignees[indexAssignee].openTicketsWithBudget += 1;
+
+                                                   } else if(budgetTime == 0 && usedTime == 0 && response[index].state == "open"){ //not planned
+                                                       $scope.assignees[indexAssignee].openTickets += 1;
+                                                       $scope.assignees[indexAssignee].openTicketsWithoutBudget += 1;
+                                                   }
+                                               }
+                                            });
                                         }
                                     }
                                 });
@@ -418,7 +450,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                     });
                 });
 
-
+                // replace the selected assignee with the new from object from github
                 if(savedAssignee !== undefined && savedAssignee !== "undefined" && savedAssignee !== null){
                     var assignee = $.grep($scope.assignees, function (n, i) {
                         return (n.id == savedAssignee.id);
@@ -429,10 +461,13 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                     }
                 }
 
-                var scope = angular.element($('#BoardCtrl')).scope();
-                scope.boards = $scope.boards;
+                //var scope = angular.element($('#BoardCtrl')).scope();
+                //scope.boards = $scope.boards;
             });
         });
+        var scope = angular.element($('#BoardCtrl')).scope();
+        scope.boards = $scope.boards;
+        scope.assignees = $scope.assignees;
     };
 
     $scope.loadUserData = function () {
