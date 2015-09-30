@@ -18,13 +18,13 @@
     </div>
     <div class="space-24"></div>
     <div style="display:flex; flex-flow: row wrap;align-items: center;">
-        <div ng-repeat="assignee in assignees" class="filter-select" ng-if="assignee.id != 'all'">
+        <div ng-repeat="assignee in assignees" class="filter-select panel bs-callout card" ng-if="assignee.id != 'all'">
             <div style="display:flex; flex-flow: row wrap;align-items: center;">
                 <div style="-webkit-flex: 1;flex: 0 0 80px;">
                     <a href="[[assignee.html_url]]" target="_blank"><img src="[[assignee.avatar_url]]" ng-show="assignee" class="user-photo" title="[[assignee.login]]" alt="[[assignee.login]]"/></a>
                 </div>
                 <div style="-webkit-flex: 1;flex: 1;">
-                    <b>[[assignee.login]]</b>
+                    <a href="[[assignee.html_url]]" target="_blank"><b>[[assignee.login]]</b></a>
                 </div>
             </div>
             <br>
@@ -125,37 +125,35 @@
                             </ul>
                         </div>
                         <div ng-repeat="item in column.issues" sv-element
-                             class="multi panel bs-callout bs-callout-warning card">
+                             class="multi panel bs-callout bs-callout-warning card" ng-style="{ 'border-color': item.hint.color }">
                             <div class="row">
                                 <div class="col-xs-9">
-                                    <h1>                                        <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
-                                        <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i> [[item.title]]</h1>
-
+                                    <h1>
+                                        [[item.title]]
+                                    </h1>
                                     <p><br>
-
-                                        <a href="[[item.html_url]]"
-                                           target="_blank" class="transicion" title="Ticket [[item.number]]"
-                                           alt="Ticket [[item.number]]"> <i class="fa fa-github"></i>
-                                            [[getRepoName(item)]]</a><br>
-                                        <i class="fa fa-map-marker"></i>
-                                        [[item.milestone.title]]
-                                        <br>
-                                        <a href="[[item.html_url]]"
-                                           target="_blank" class="transicion" title="[[item.comments]] Kommentare"
-                                           alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
+                                        <i class="fa fa-github"></i> [[getRepoName(item)]]<br>
+                                        <a href="[[item.milestone.html_url]]" title="Meilenstein öffnen" alt="Meilenstein öffnen"><i class="fa fa-map-marker"></i>&nbsp;&nbsp;[[item.milestone.title]]</a><br>
+                                        <a href="[[item.html_url]]" target="_blank" class="transicion" title="[[item.comments]] Kommentare" alt="[[issue.comments]] Kommentare"><i class="fa fa-comments-o"></i>[[item.comments]]</a>
                                         &nbsp;&nbsp;<i class="fa fa-clock-o"></i> [[getBudgetTime(item)]]
                                         &nbsp;&nbsp;<i class="fa fa-thumbs-o-up"></i> [[getUsedTime(item)]]
-
                                     </p>
                                     <p>
                                             <span class="label label-default" style="background-color: [[label.color]];"
                                                   ng-repeat="label in item.labels track by $index">[[label.name]]</span>
                                     </p>
                                 </div>
-                                <div class="col-xs-3"><p><a href="[[item.assignee.html_url]]" target="_blank"><img
-                                        src="[[item.assignee.avatar_url]]" ng-show="item.assignee"
-                                        class="user-photo"
-                                        title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></p><p>#[[item.number]]</p></div>
+                                <div class="col-xs-3">
+                                    <p><a href="[[item.assignee.html_url]]" target="_blank"><img src="[[item.assignee.avatar_url]]" ng-show="item.assignee" class="user-photo" title="[[item.assignee.login]]" alt="[[item.assignee.login]]"/></a></p>
+                                    <p>
+                                        <i class="fa fa-circle danger" ng-show="item.state == 'open'" title=""></i>
+                                        <i class="fa fa-check-circle success" ng-show="item.state == 'closed'"></i>
+                                        <a href="[[item.html_url]]" target="_blank" class="transicion" title="Ticket [[item.number]] öffnen" alt="Ticket [[item.number]] öffnen">#[[item.number]]</a>
+                                    </p>
+                                    <p>
+                                        <span class="label label-default" ng-bind="item.hint.text"></span>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -114,14 +114,52 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
     $scope.end = function ($item, $part, $index) {
     };
 
+    $scope.getColor = function (color) {
+        return color;
+    };
+
+    /*$scope.getTicketStatus = function ($item, $column) {
+        var ok = true;
+        var hint = [];
+        var errorColor = "#e11d21";
+        //$item.hint = [];
+
+        $.each($item.labels, function (index, value) {
+            // State stimmt nicht. Somit wurde zwar das Label in Github gesetzt aber der Status nicht
+            var tags = $.grep($column.tags, function (n, i) {
+                return (n.url == $item.labels[index].url && n.state != $item.state);
+            });
+
+            if (tags.length > 0) {
+                ok = false;
+                hint.push({"type": "timeFailed", "color": errorColor, "text": "Status fehlerhaft"});
+            }
+        });
+
+        // hierbei wurde das Ticket auf erledigt gesetzt, aber es wurde vergessen die Zeit einzutragen
+        if ($item.budgetTime > 0 && $item.usedTime == 0 && $item.state == "closed") {
+            ok = false;
+            hint.push({"type": "timeFailed", "color": errorColor, "text": "Zeit fehlerhaft"});
+        }
+
+        $item.hint = hint;
+
+        if (ok) {
+            return "none";
+        } else {
+            return errorColor;
+        }
+    };*/
+
+
     $scope.getRepoName = function ($item, $part, $index) {
         var name = $item.url.split("/");
         return name[5];
     };
 
-    $scope.$watch('boards[0].columns', function (newValue, oldValue) {
+    /*$scope.$watch('boards[0].columns', function (newValue, oldValue) {
 
-    });
+    });*/
 
     $scope.isOpen = function (item) {
         if (item.state == "open") {

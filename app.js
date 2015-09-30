@@ -350,6 +350,47 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
 
     };
 
+    $scope.getTicketStatus = function ($item, $column) {
+        var ok = true;
+        var hint = {};
+        var errorColor = "#e11d21";
+        $item.hint = {"type": "","color":"none","text":""};
+
+        var labelError = false;
+        $.each($item.labels, function (index, value) {
+            // State stimmt nicht. Somit wurde zwar das Label in Github gesetzt aber der Status nicht
+            var tags = $.grep($column.tags, function (n, i) {
+                return (n.url == $item.labels[index].url && n.state != $item.state);
+            });
+
+            if (tags.length > 0) {
+                labelError = true;
+            }
+        });
+
+        // hierbei wurde das Ticket auf erledigt gesetzt, aber es wurde vergessen die Zeit einzutragen
+        if ($item.budgetTime > 0 && $item.usedTime == 0 && $item.state == "closed" && labelError) {
+            ok = false;
+            hint.type = "timeFailed";
+            hint.color = errorColor;
+            hint.text = "Zeit und Status fehlerhaft";
+        }else if(labelError){
+            ok = false;
+            hint.type = "timeFailed";
+            hint.color = errorColor;
+            hint.text = "Status fehlerhaft";
+        }else if($item.budgetTime > 0 && $item.usedTime == 0 && $item.state == "closed"){
+            ok = false;
+            hint.type = "timeFailed";
+            hint.color = errorColor;
+            hint.text = "Zeit fehlerhaft";
+        }
+
+        $item.hint = hint;
+
+        return $item;
+    };
+
     //ISSUES
     $scope.loadIssues = function () {
         var random = Math.random();
@@ -395,6 +436,10 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location) {
                                         if (isIssueInList.length == 0) {
                                             var budgetTime = $scope.paseTime($scope.getBudgetTime(response[index]));
                                             var usedTime = $scope.paseTime($scope.getUsedTime(response[index]));
+                                            response[index].budgetTime = budgetTime;
+                                            response[index].usedTime = usedTime;
+
+                                            response[index] = $scope.getTicketStatus(response[index], $scope.boards[indexBoard].columns[indexColumn]);
 
                                             // Ticket to column
                                             if (savedAssignee == null || savedAssignee == undefined || savedAssignee.id == 'all' ||(response[index].assignee != null && response[index].assignee.id == savedAssignee.id)) {
