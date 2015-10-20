@@ -1,6 +1,7 @@
 var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
 
     $scope.settingsOn = false;
+    $scope.newIssuesOn = false;
 
     $scope.localLang = {
         selectAll: "Tick all",
@@ -10,6 +11,16 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         nothingSelected: "Filter hinzufügen"         //default-label is deprecated and replaced with this.
     };
 
+    $scope.localLangRepo = {
+        selectAll: "Tick all",
+        selectNone: "Tick none",
+        reset: "Undo all",
+        search: "Suche...",
+        nothingSelected: "Repository wählen"         //default-label is deprecated and replaced with this.
+    };
+
+    $scope.newIssues = [];
+    $scope.newIssueRepo = [];
 
     $scope.labels = ["January", "February", "March", "April", "May", "June", "July"];
     $scope.series = ['Series A', 'Series B'];
@@ -54,12 +65,111 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
      */
     $scope.saveBoards = function (boardIndex, colIndex) {
         if ($scope.boards !== undefined) {
+            console.log($scope.boards);
             $scope.boards[boardIndex].columns[colIndex].tags = $scope.boards[boardIndex].columns[colIndex].selectedTags;
             $scope.boards[boardIndex].columns[colIndex].states = $scope.boards[boardIndex].columns[colIndex].selectedStates;
             localStorage.setItem("fongas.boards", JSON.stringify($scope.boards));
         }
     };
 
+    /* ADD ISSUES - saveNewIssueRepo */
+    $scope.newIssueToRepo = function (repo) {
+        repo.issues.push($scope.defaultIssue);
+    };
+
+    $scope.saveNewIssueRepo = function (newIssueRepo) {
+        if (newIssueRepo != undefined) {
+            var random = Math.random();
+            var x = {"repo": newIssueRepo[0], "issues": []};
+            x.issues.push(angular.copy($scope.defaultIssue));
+
+            $.ajax({
+                url: 'https://' + newIssueRepo[0].token + ':x-oauth-basic@api.github.com/repos/' + newIssueRepo[0].url + '/labels?state=all&filter=all&random=' + random,
+                type: 'GET',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "token " + newIssueRepo[0].token + "");
+                }
+            }).done(function (response) {
+                $scope.$apply(function () {
+                    x.labels = response;
+                    $.ajax({
+                        url: 'https://' + newIssueRepo[0].token + ':x-oauth-basic@api.github.com/repos/' + newIssueRepo[0].url + '/milestones?state=all&filter=all&random=' + random,
+                        type: 'GET',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("Authorization", "token " + newIssueRepo[0].token + "");
+                        }
+                    }).done(function (response) {
+                        $scope.$apply(function () {
+                            x.milestones = response;
+                            $.ajax({
+                                url: 'https://' + newIssueRepo[0].token + ':x-oauth-basic@api.github.com/repos/' + newIssueRepo[0].url + '/assignees?state=all&filter=all&random=' + random,
+                                type: 'GET',
+                                beforeSend: function (xhr) {
+                                    xhr.setRequestHeader("Authorization", "token " + newIssueRepo[0].token + "");
+                                }
+                            }).done(function (response) {
+                                $scope.$apply(function () {
+                                    x.assignees = response;
+                                    $scope.newIssues.push(x);
+                                    $.each($scope.repos, function (repoIndex, repoValue) {
+                                        if($scope.repos[repoIndex].id == newIssueRepo[0].id){
+                                            $scope.repos[repoIndex].selected = false;
+                                        }
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        }
+    };
+
+    $scope.postNewIssues = function (repoIndex) {
+
+        $.each($scope.newIssues[repoIndex].issues, function (index, value) {
+            var labels = [];
+            $.each($scope.newIssues[repoIndex].issues[index].labels, function (indexLabels, value) {
+                labels.push($scope.newIssues[repoIndex].labels[indexLabels].name);
+            });
+
+            var issue  = {
+                "title": $scope.newIssues[repoIndex].issues[index].title,
+                "body": $scope.newIssues[repoIndex].issues[index].body,
+                "assignee": $scope.newIssues[repoIndex].issues[index].assignee[0].login,
+                "milestone": $scope.newIssues[repoIndex].issues[index].milestone[0].number,
+                "labels": labels
+            };
+
+            return $.ajax({
+                url: 'https://' + $scope.newIssues[repoIndex].repo.token + ':x-oauth-basic@api.github.com/repos/' + $scope.newIssues[repoIndex].repo.url + '/issues',
+                type: 'POST',
+                data: JSON.stringify(issue),
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "token " + $scope.newIssues[repoIndex].repo.token + "");
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                }
+            }).done(function (response) {
+                //delete the created from list
+                return response;
+            }, function () {
+                return null;
+            });
+        });
+        $scope.newIssues[repoIndex].issues = [];
+    };
+
+    $scope.deleteNewIssue = function (repoIndex, $index) {
+        $scope.newIssues[repoIndex].issues.splice($index, 1);
+    };
+
+    $scope.addNewIssue = function (repoIndex) {
+        $scope.newIssues[repoIndex].issues.push(angular.copy($scope.defaultIssue));
+        console.log($scope.newIssues);
+        console.log($scope.boards);
+        console.log($scope.availableTags);
+    };
+    /* ADD ISSUES - END */
 
     $scope.sort = function ($item, $partFrom, $partTo, $indexFrom, $indexTo, $index, $indexBoard) {
         //spalten nach dem $item durchgehen
@@ -118,48 +228,11 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         return color;
     };
 
-    /*$scope.getTicketStatus = function ($item, $column) {
-        var ok = true;
-        var hint = [];
-        var errorColor = "#e11d21";
-        //$item.hint = [];
-
-        $.each($item.labels, function (index, value) {
-            // State stimmt nicht. Somit wurde zwar das Label in Github gesetzt aber der Status nicht
-            var tags = $.grep($column.tags, function (n, i) {
-                return (n.url == $item.labels[index].url && n.state != $item.state);
-            });
-
-            if (tags.length > 0) {
-                ok = false;
-                hint.push({"type": "timeFailed", "color": errorColor, "text": "Status fehlerhaft"});
-            }
-        });
-
-        // hierbei wurde das Ticket auf erledigt gesetzt, aber es wurde vergessen die Zeit einzutragen
-        if ($item.budgetTime > 0 && $item.usedTime == 0 && $item.state == "closed") {
-            ok = false;
-            hint.push({"type": "timeFailed", "color": errorColor, "text": "Zeit fehlerhaft"});
-        }
-
-        $item.hint = hint;
-
-        if (ok) {
-            return "none";
-        } else {
-            return errorColor;
-        }
-    };*/
-
 
     $scope.getRepoName = function ($item, $part, $index) {
         var name = $item.url.split("/");
         return name[5];
     };
-
-    /*$scope.$watch('boards[0].columns', function (newValue, oldValue) {
-
-    });*/
 
     $scope.isOpen = function (item) {
         if (item.state == "open") {
@@ -181,6 +254,9 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
     };
     $scope.hideSettings = function () {
         $scope.settingsOn = false;
+    };
+    $scope.showNewIssues = function () {
+        $scope.newIssuesOn = true;
     };
 
     $scope.getDatetime = new Date();

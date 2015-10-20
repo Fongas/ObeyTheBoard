@@ -1084,6 +1084,10 @@ body.modal-open, .modal-open .navbar-fixed-top, .modal-open .navbar-fixed-bottom
     line-height: 16px;
     padding: 6px 12px 5px;
     font-size: 12px;
+
+    color: #FFF;
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(0, 0, 0, 0.1);
 }
 
 input, select, textarea {
@@ -1906,11 +1910,19 @@ dd {
     border-color: #F4F4F4;
     background: #F4F4F4;
     color: #333;
+
+    color: #FFF;
+    background: rgba(0, 0, 0, 0.2);
+    /*border-color: rgba(0, 0, 0, 0.9);*/
 }
 
 .btn-default:hover {
-    background-color: #EEEEEE;
+    /*background-color: #EEEEEE;
     background-image: none;
+*/
+    border-color: #F4F4F4;
+    color: #FFF;
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .btn-default.btn-clean {
@@ -4226,3 +4238,21 @@ span {
     flex: 1 1 auto;
 }
 
+.padding-10{
+    padding: 10px;
+}
+
+.padding-5{
+    padding: 5px;
+}
+
+.multiSelect > button, .multiSelect > button:hover
+{
+    background: rgba(0, 0, 0, 0.2);
+    border-color: transparent;
+    color: #FFF;
+}
+
+.multiSelect .caret, .multiSelect .caret:hover{
+    border-top-color: #FFF;
+}
