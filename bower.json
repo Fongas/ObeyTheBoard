@@ -26,7 +26,7 @@
     "angular-route": "#1.4.5",
     "angular-sanitize": "#1.4.5",
     "angular-sortable-view": "#0.0.13",
-    "angular-ui-select3": "#ui-select#*",
+    "angular-ui-select3": "ui-select#*",
     "angularLocalStorage": "#0.3.0",
     "bootstrap": "#3.3.5",
     "components-font-awesome": "#4.3.0",
