@@ -72,6 +72,10 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         }
     };
 
+    $scope.refreshAllData = function () {
+        $scope.init();
+    };
+
     /* ADD ISSUES - saveNewIssueRepo */
     $scope.newIssueToRepo = function (repo) {
         repo.issues.push($scope.defaultIssue);
@@ -250,13 +254,25 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
     };
 
     $scope.showSettings = function () {
+        $scope.hideBoard();
+        $scope.newIssuesOn = false;
         $scope.settingsOn = true;
     };
     $scope.hideSettings = function () {
+        $scope.showBoard();
+        $scope.newIssuesOn = false;
         $scope.settingsOn = false;
     };
     $scope.showNewIssues = function () {
+        $scope.hideBoard();
+        $scope.settingsOn = false;
         $scope.newIssuesOn = true;
+    };
+    $scope.hideNewIssues = function () {
+        $scope.showBoard();
+
+        $scope.settingsOn = false;
+        $scope.newIssuesOn = false;
     };
 
     $scope.getDatetime = new Date();

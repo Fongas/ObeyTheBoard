@@ -1,67 +1,35 @@
 <div class="widget-body" ng-controller="BoardCtrl" id="BoardCtrl">
     <div class="row">
-        <div class="col-md-12">
-            <button type="button" ng-click="go('/board');" class="btn btn-default"><i class="fa fa-columns"></i> Board</button>
-            <button type="button" ng-click="go('/user');" class="btn btn-default"><i class="fa fa-cogs"></i> User</button>
-            <button type="button" ng-click="refreshAllData();" class="btn btn-default"><i class="fa fa-refresh"></i> Refresh all Data</button>
-            <button type="button" ng-hide="showSelect" ng-click="showBoard();" class="btn btn-default">show Board
-            </button>
-            <button type="button" ng-show="showSelect" ng-click="hideBoard();" class="btn btn-default">hide Board
-            </button>
-            <button type="button" ng-hide="settingsOn" ng-click="showSettings();" class="btn btn-default">show
-                Settings
-            </button>
-            <button type="button" ng-show="settingsOn" ng-click="hideSettings();" class="btn btn-default">hide
-                Settings
-            </button>
-            <button type="button" ng-hide="newIssuesOn" ng-click="showNewIssues();" class="btn btn-default"><i class="fa fa-tags"></i> show new Issues
-            </button>
-            <button type="button" ng-show="newIssuesOn" ng-click="showNewIssues();" class="btn btn-default"><i class="fa fa-tags"></i> hide new Issues
-            </button>
-            <button type="button" ng-click="addMessage();" class="btn btn-default"><i class="fa fa-envelope"></i>  addMessage
-            </button>
+        <div class="col-md-6">
+            <button type="button" ng-click="go('/board');" class="btn btn-default btn-active"><i class="fa fa-columns"></i> Board</button>
+            <button type="button" ng-click="go('/user');" class="btn btn-default"><i class="fa fa-user"></i> User Settings</button>
+        </div>
+        <div class="col-md-6 right-align">
+            <div class="pull-right control-group">
+                <button type="button" ng-click="init();" class="btn btn-default"><i class="fa fa-refresh"></i> Refresh Board</button>
+                <button type="button" ng-hide="settingsOn" ng-click="hideBoard();showSettings();" class="btn btn-default"><i class="fa fa-cogs"></i> Column Settings
+                </button>
+                <button type="button" ng-show="settingsOn" ng-click="showBoard();hideSettings();" class="btn btn-default btn-active"><i class="fa fa-cogs"></i> Column Settings
+                </button>
+                <button type="button" ng-hide="newIssuesOn" ng-click="showNewIssues();" class="btn btn-default"><i class="fa fa-tags"></i> new Issues
+                </button>
+                <button type="button" ng-show="newIssuesOn" ng-click="hideNewIssues();" class="btn btn-default btn-active"><i class="fa fa-tags"></i> new Issues
+                </button>
+                <button type="button" ng-click="addMessage();" class="btn btn-default hidden"><i class="fa fa-envelope"></i>  addMessage
+                </button>
+            </div>
         </div>
     </div>
-    <div class="space-24"></div>
-    <div style="display:flex; flex-flow: row wrap;align-items: center;">
-        <div ng-repeat="assignee in assignees" class="filter-select panel bs-callout card" ng-if="assignee.id != 'all'" style="position:relative;">
-            <div style="display:flex; flex-flow: row wrap;align-items: center;">
-                <div style="-webkit-flex: 1;flex: 0 0 80px;">
-                    <a href="[[assignee.html_url]]" target="_blank"><img src="[[assignee.avatar_url]]" ng-show="assignee" class="user-photo" title="[[assignee.login]]" alt="[[assignee.login]]"/></a>
-                </div>
-                <div style="-webkit-flex: 1;flex: 1;">
-                    <a href="[[assignee.html_url]]" target="_blank"><b>[[assignee.login]]</b></a>
-                </div>
-            </div>
-            <br>
-            <div style="display:flex; flex-flow: row wrap;align-items: center;">
-                <div style="-webkit-flex: 1;flex: 0 0 80px;">
-                    <i class="fa fa-clock-o"></i> [[assignee.budgetTime | minutesToHours]]<br>
-                    <i class="fa fa-thumbs-o-up"></i> [[assignee.usedTime | minutesToHours]]<br>
-                </div>
-                <div style="-webkit-flex: 1;flex: 1;">
-                    <i class="fa fa-flag-checkered"></i> [[assignee.openTime | minutesToHours]]<br>
-                    <i class="fa fa-ticket"></i> [[assignee.openTickets]]&nbsp;&nbsp;(<i class="fa fa-clock-o"></i> [[assignee.openTicketsWithBudget]] / <i class="fa fa-ban"></i> [[assignee.openTicketsWithoutBudget]])
-                </div>
 
-                <div style="-webkit-flex: 1;flex: 1; max-width: 150px;max-height: 150px;">
-                    <canvas id="doughnut[[assignee.id]]" class="chart chart-doughnut"
-                            chart-data="assignee.openTicketsPerBoardAndColumn[0]" chart-labels="assignee.boardColumnNames[0]" chart-colours="assignee.boardColumnColors[0]"
-                            chart-options='chart.doughnut'>
-                    </canvas>
-                    <span ng-bind-html="assignee | differenceToPercent" style="position: absolute;top: 62%;right: 19%;"></span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="space-24"></div>
+    <div class="space-24" ng-if="false"></div>
     <div class="row" ng-if="false">
         <canvas id="line" class="chart chart-line" chart-data="timeline.all"
                 chart-labels="timeline.labels" chart-legend="true" chart-series="timeline.series"
                 chart-click="onClick" >
         </canvas>
     </div>
-    <div class="space-24"></div>
+
+    <div class="space-24" ng-if="newIssuesOn"></div>
     <div class="row panel padding-10" ng-if="newIssuesOn">
         <div class="col-xs-12">
             <div isteven-multi-select
@@ -133,8 +101,10 @@
             </div>
         </div>
     </div>
-    <div class="space-24"></div>
+
+    <div class="space-24" ng-if="settingsOn"></div>
     <div class="row" ng-if="settingsOn">
+        <br>
         <div class="col-xs-3" ng-repeat="column in boards[0].columns track by $index">
             <div isteven-multi-select
                  input-model="availableTags[0][$index]"
@@ -181,9 +151,41 @@
             </div>
         </div>
     </div>
-    <div class="space-24"></div>
 
     <!-- Columns START -->
+    <div class="space-24" ng-if="showSelect"></div>
+    <div ng-if="showSelect" style="display:flex; flex-flow: row wrap;align-items: center;">
+        <div ng-repeat="assignee in assignees" class="filter-select panel bs-callout card" ng-if="assignee.id != 'all'" style="position:relative;">
+            <div style="display:flex; flex-flow: row wrap;align-items: center;">
+                <div style="-webkit-flex: 1;flex: 0 0 80px;">
+                    <a href="[[assignee.html_url]]" target="_blank"><img src="[[assignee.avatar_url]]" ng-show="assignee" class="user-photo" title="[[assignee.login]]" alt="[[assignee.login]]"/></a>
+                </div>
+                <div style="-webkit-flex: 1;flex: 1;">
+                    <a href="[[assignee.html_url]]" target="_blank"><b>[[assignee.login]]</b></a>
+                </div>
+            </div>
+            <br>
+            <div style="display:flex; flex-flow: row wrap;align-items: center;">
+                <div style="-webkit-flex: 1;flex: 0 0 80px;">
+                    <i class="fa fa-clock-o"></i> [[assignee.budgetTime | minutesToHours]]<br>
+                    <i class="fa fa-thumbs-o-up"></i> [[assignee.usedTime | minutesToHours]]<br>
+                </div>
+                <div style="-webkit-flex: 1;flex: 1;">
+                    <i class="fa fa-flag-checkered"></i> [[assignee.openTime | minutesToHours]]<br>
+                    <i class="fa fa-ticket"></i> [[assignee.openTickets]]&nbsp;&nbsp;(<i class="fa fa-clock-o"></i> [[assignee.openTicketsWithBudget]] / <i class="fa fa-ban"></i> [[assignee.openTicketsWithoutBudget]])
+                </div>
+
+                <div style="-webkit-flex: 1;flex: 1; max-width: 150px;max-height: 150px;">
+                    <canvas id="doughnut[[assignee.id]]" class="chart chart-doughnut"
+                            chart-data="assignee.openTicketsPerBoardAndColumn[0]" chart-labels="assignee.boardColumnNames[0]" chart-colours="assignee.boardColumnColors[0]"
+                            chart-options='chart.doughnut'>
+                    </canvas>
+                    <span ng-bind-html="assignee | differenceToPercent" style="position: absolute;top: 62%;right: 19%;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="space-24" ng-if="showSelect"></div>
     <div ng-hide="false" ng-if="showSelect">
         <div class="row">
             <div class="col-xs-3 pull-right" style="display:flex; flex-flow: row wrap;align-items: center;">
