@@ -686,8 +686,8 @@ $scope.fongas = null;
                         closed.push($scope.timeline.closed[date]);
                         all.push($scope.timeline.dates[date]);
                     }
-                    console.warn(dates);
-                    console.warn(datesStrings);
+                    //console.warn(dates);
+                    //console.warn(datesStrings);
 
                     $scope.timeline.all[0] = all;
                     $scope.timeline.all[1] = open;
@@ -706,7 +706,7 @@ $scope.fongas = null;
                      $scope.timeline.all[2] = closed;
                      */
                     $scope.timeline.series = ['All', 'open', 'closed'];
-                    console.log($scope.timeline);
+                    //console.log($scope.timeline);
 
 
 //                    $.each(datesStrings, function (index, value) {
@@ -732,6 +732,7 @@ $scope.fongas = null;
     };
 
     $scope.loadUserData = function () {
+        //console.log("loadUserData");
         var random = Math.random();
         $.each($scope.users, function (repoIndex, repoValue) {
             $.ajax({

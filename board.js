@@ -2,6 +2,7 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
 
     $scope.settingsOn = false;
     $scope.newIssuesOn = false;
+    $scope.boardOn = true;
 
     $scope.localLang = {
         selectAll: "Tick all",
@@ -134,7 +135,7 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         $.each($scope.newIssues[repoIndex].issues, function (index, value) {
             var labels = [];
             $.each($scope.newIssues[repoIndex].issues[index].labels, function (indexLabels, value) {
-                labels.push($scope.newIssues[repoIndex].labels[indexLabels].name);
+                labels.push(value.name);
             });
 
             var issue  = {
@@ -247,10 +248,12 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
     };
 
     $scope.showBoard = function () {
-        $scope.showSelect = true;
+        $scope.boardOn = true;
+        $scope.settingsOn = false;
+        $scope.newIssuesOn = false;
     };
     $scope.hideBoard = function () {
-        $scope.showSelect = false;
+        $scope.boardOn = false;
     };
 
     $scope.showSettings = function () {
@@ -268,6 +271,13 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
         $scope.settingsOn = false;
         $scope.newIssuesOn = true;
     };
+    $scope.hideNewIssues = function () {
+        $scope.showBoard();
+
+        $scope.settingsOn = false;
+        $scope.newIssuesOn = false;
+    };
+
     $scope.hideNewIssues = function () {
         $scope.showBoard();
 

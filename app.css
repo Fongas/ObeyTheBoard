@@ -396,3 +396,7 @@ position: relative;
     -moz-border-radius: 20px;
     border-radius: 20px;
 }
+
+.no-margin{
+    margin: 0px;
+}
