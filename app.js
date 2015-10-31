@@ -92,7 +92,7 @@ module.filter('issueAssigneeFilter', function () {
     };
 });
 
-var MainCtrl = function MainCtrl($scope, $timeout, $http, $location, growl) { //, $firebaseArray
+var MainCtrl = function MainCtrl($scope, $timeout, $http, $location, growl, $rootScope) { //, $firebaseArray
     $scope.repositories = [];
     $scope.users = [];
 
@@ -261,7 +261,7 @@ $scope.fongas = null;
         //console.log($scope.selectedTags);
     });
 
-    $scope.getBudgetTime = function (item) {
+    $rootScope.getBudgetTime = function (item) {
         var regLine = new RegExp("\n", "g");
         var regClock = new RegExp(":clock1:", "g");
         var lineArray = item.body.split(regLine);
@@ -275,7 +275,7 @@ $scope.fongas = null;
         return result;
     };
 
-    $scope.getUsedTime = function (item) {
+    $rootScope.getUsedTime = function (item) {
         var regLine = new RegExp("\n", "g");
         var regUsed = new RegExp(":\+1:", "g");
         var lineArray = item.body.split(regLine);
@@ -284,6 +284,36 @@ $scope.fongas = null;
         $.each(lineArray, function (index, value) {
             if (lineArray[index].search(/:\+1:/) != -1) {
                 result = lineArray[index].replace(/:\+1:/, "").trim().split('-')[0];
+            }
+        });
+
+        return result;
+    };
+
+    $rootScope.clearBudgetTime = function (item) {
+        var regLine = new RegExp("\n", "g");
+        var regClock = new RegExp(":clock1:", "g");
+        var lineArray = item.body.split(regLine);
+        var result = "";
+
+        $.each(lineArray, function (index, value) {
+            if (lineArray[index].search(regClock) == -1) {
+                result += lineArray[index] + "\n";
+            }
+        });
+        return result;
+    };
+
+    $rootScope.clearUsedTime = function (item) {
+        var regLine = new RegExp("\n", "g");
+        var regUsed = new RegExp(":\+1:", "g");
+        var lineArray = item.body.split(regLine);
+        var result = "";
+
+        $.each(lineArray, function (index, value) {
+            console.warn(lineArray[index]);
+            if (lineArray[index].search(/:\+1:/) == -1) {
+                result += lineArray[index] + "\n";
             }
         });
 
@@ -879,5 +909,5 @@ $scope.fongas = null;
         });
     };
 };
-MainCtrl.$inject = ['$scope', '$timeout', '$http', '$location', 'growl']; //,'$firebaseArray'
+MainCtrl.$inject = ['$scope', '$timeout', '$http', '$location', 'growl','$rootScope']; //,'$firebaseArray'
 module.controller('MainCtrl', MainCtrl);

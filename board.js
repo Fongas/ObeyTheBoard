@@ -1,4 +1,4 @@
-var BoardCtrl = function BoardCtrl($scope, $timeout, $http, growl) {
+var BoardCtrl = function BoardCtrl($scope, $timeout, $http, growl, $modal) {
 
     $scope.settingsOn = false;
     $scope.newIssuesOn = false;
@@ -7,16 +7,16 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http, growl) {
     $scope.localLang = {
         selectAll: "Tick all",
         reset: "Undo all",
-        search: "Suche...",
-        nothingSelected: "Filter hinzufügen"         //default-label is deprecated and replaced with this.
+        search: "Search ...",
+        nothingSelected: "Add filter"         //default-label is deprecated and replaced with this.
     };
 
     $scope.localLangRepo = {
         selectAll: "Tick all",
         selectNone: "Tick none",
         reset: "Undo all",
-        search: "Suche...",
-        nothingSelected: "Repository wählen"         //default-label is deprecated and replaced with this.
+        search: "Search ...",
+        nothingSelected: "Select repository"         //default-label is deprecated and replaced with this.
     };
 
     $scope.newIssues = [];
@@ -217,14 +217,35 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http, growl) {
             "state": state,
             "labels": newLabels
         };
-
-        var issueUpdate = $scope.updateIssues($item, issue);
-
-        issueUpdate.done(function (result) {
-            $scope.$apply(function () {
-                $scope.boards[$indexBoard].columns[targetColumn].issues[$indexTo] = result;
+        console.log($scope.issue);
+        $scope.tmpIssue = angular.copy(issue);
+        console.log($scope.tmpIssue);
+        //Ask used time for the ticket
+        $timeout(function(){
+            var modalInstance = $modal.open({
+                animation: true,
+                templateUrl: 'modalUpdateIssue.html',
+                controller: 'ModalInstanceCtrl2',
+                size: 200,
+                resolve: {
+                    issue: function () {
+                        return $scope.tmpIssue;
+                    }
+                }
             });
-        });
+
+            modalInstance.result.then(function (issue) {
+                var issueUpdate = $scope.updateIssues($item, issue);
+
+                issueUpdate.done(function (result) {
+                    $scope.$apply(function () {
+                        $scope.boards[$indexBoard].columns[targetColumn].issues[$indexTo] = result;
+                    });
+                });
+            }, function () {
+                // keine Aktion durchführen
+            });
+        },0);
     };
 
     $scope.end = function ($item, $part, $index) {
@@ -345,7 +366,29 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http, growl) {
 };
 
 
-BoardCtrl.$inject = ['$scope', '$timeout', '$http','growl'];
+BoardCtrl.$inject = ['$scope', '$timeout', '$http','growl','$modal'];
 module.controller('BoardCtrl', BoardCtrl);
 
+// Please note that $modalInstance represents a modal window (instance) dependency.
+// It is not the same as the $modal service used above.
+
+module.controller('ModalInstanceCtrl2', function ($scope, $rootScope, $modalInstance, issue) {
+
+    $scope.issue = issue;
+
+    $scope.budgetTime = $rootScope.getBudgetTime(issue);
+    $scope.usedTime = $rootScope.getUsedTime(issue);
+    $scope.issue.body = $rootScope.clearBudgetTime(issue);
+    $scope.issue.body = $rootScope.clearUsedTime($scope.issue);
+
+    $scope.ok = function () {
+        $scope.issue.body = $scope.issue.body + "\n:clock1: " + $scope.budgetTime;
+        $scope.issue.body = $scope.issue.body + "\n:+1: " + $scope.usedTime;
+        $modalInstance.close($scope.issue);
+    };
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+});
 

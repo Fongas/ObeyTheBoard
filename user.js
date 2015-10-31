@@ -173,4 +173,3 @@ module.controller('ModalInstanceCtrl', function ($scope, $modalInstance, items) 
         $modalInstance.dismiss('cancel');
     };
 });
-

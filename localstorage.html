@@ -4,11 +4,11 @@
             <button type="button" ng-click="go('/board');" class="btn btn-default"><i class="fa fa-columns"></i> Board
             </button>
             <button type="button" ng-click="go('/user');" class="btn btn-default"><i class="fa fa-cogs"></i>
-                User Settings
+                User settings
             </button>
             <button type="button" ng-click="go('/localstorage');" class="btn btn-default btn-active"><i
                     class="fa fa-database"></i>
-                Local Storage
+                Local storage
             </button>
         </div>
     </div>
@@ -17,13 +17,13 @@
         <div class="col-xs-12 col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading trans-background">
-                    <span class="panel-header-title">Stored Data</span>
+                    <span class="panel-header-title">Stored data</span>
 
                     <form class="form-inline">
                         <div class="form-group pull-right" style="position: relative;top: -23px;">
                             <span class="pull-right">
                                 <button class="btn btn-xs no-padding" ng-click="clearLocalStorage()">
-                                    <i class="fa fa-trash"></i> clear complete local storage
+                                    <i class="fa fa-trash"></i> Clear complete local storage
                                 </button>
                             </span>
                         </div>
@@ -44,7 +44,7 @@
                 <div class="panel-heading trans-background">
                     [[localStorageItem.key]]&nbsp;<span class="pull-right" style="position: relative;top: -7px;">
                     <button class="btn btn-xs no-padding" ng-click="clearLocalStorageItem(localStorageItem.key)"><i
-                            class="fa fa-trash"></i> delete this data
+                            class="fa fa-trash"></i> delete
                     </button>
                 </span>
                 </div>
@@ -53,7 +53,7 @@
                         <div class="col-xs-12 col-md-9">
                             <form class="form-horizontal">
                                 <div class="form-group">
-                                    <label class="control-label col-xs-2">Daten</label>
+                                    <label class="control-label col-xs-2">Data</label>
 
                                     <div class="col-xs-9">
                                         <div json-viewer="localStorageItem.value"></div>
@@ -69,27 +69,27 @@
 
     <script type="text/ng-template" id="modalLocalStorage.html">
         <div class="modal-header">
-            <h3 class="modal-title">Daten löschen</h3>
+            <h3 class="modal-title">Delete data</h3>
         </div>
         <div class="modal-body">
-            <p>Sollen wirklich alle Daten zum Board gelöscht werden?</p>
+            <p>Are you sure you want erase all data of the board?</p>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" type="button" ng-click="ok()">Ja</button>
-            <button class="btn btn-warning" type="button" ng-click="cancel()">Nein</button>
+            <button class="btn btn-primary" type="button" ng-click="ok()">Yes</button>
+            <button class="btn btn-warning" type="button" ng-click="cancel()">No</button>
         </div>
     </script>
 
     <script type="text/ng-template" id="modalLocalStorageItem.html">
         <div class="modal-header">
-            <h3 class="modal-title">Daten löschen</h3>
+            <h3 class="modal-title">Delete data</h3>
         </div>
         <div class="modal-body">
-            <p>Sollen wirklich der Datensatz "[[ item ]]" gelöscht werden?</p>
+            <p>Are you sure you want erase the data "[[ item ]]" of the board?</p>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" type="button" ng-click="ok()">Ja</button>
-            <button class="btn btn-warning" type="button" ng-click="cancel()">Nein</button>
+            <button class="btn btn-primary" type="button" ng-click="ok()">Yes</button>
+            <button class="btn btn-warning" type="button" ng-click="cancel()">No</button>
         </div>
     </script>
 </div>
