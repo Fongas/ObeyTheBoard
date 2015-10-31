@@ -1,5 +1,7 @@
 var UserCtrl = function UserCtrl($scope, $timeout, $http, $modal) {
 
+        $scope.userDetailOn = false;
+
         /**
          * USERS
          */
@@ -13,6 +15,8 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http, $modal) {
         };
 
         $scope.editUser = function editUser(user) {
+            $scope.localStorageOn = false;
+            $scope.userDetailOn = true;
             $scope.currentUser = user;
         };
 
@@ -34,6 +38,7 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http, $modal) {
             $scope.loadUserData();
             $scope.loadUserRepos();
         };
+
 
         /**
          * REPOSITORIES
@@ -144,8 +149,7 @@ var UserCtrl = function UserCtrl($scope, $timeout, $http, $modal) {
             }
         };
         $scope.init();
-    }
-    ;
+    };
 
 
 UserCtrl.$inject = ['$scope', '$timeout', '$http', '$modal'];

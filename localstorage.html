@@ -1,0 +1,95 @@
+<div class="widget-body" ng-controller="LocalStorageCtrl" id="LocalStorageCtrl">
+    <div class="row">
+        <div class="col-md-6">
+            <button type="button" ng-click="go('/board');" class="btn btn-default"><i class="fa fa-columns"></i> Board
+            </button>
+            <button type="button" ng-click="go('/user');" class="btn btn-default"><i class="fa fa-cogs"></i>
+                User Settings
+            </button>
+            <button type="button" ng-click="go('/localstorage');" class="btn btn-default btn-active"><i
+                    class="fa fa-database"></i>
+                Local Storage
+            </button>
+        </div>
+    </div>
+    <div class="space-24"></div>
+    <div class="row">
+        <div class="col-xs-12 col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading trans-background">
+                    <span class="panel-header-title">Stored Data</span>
+
+                    <form class="form-inline">
+                        <div class="form-group pull-right" style="position: relative;top: -23px;">
+                            <span class="pull-right">
+                                <button class="btn btn-xs no-padding" ng-click="clearLocalStorage()">
+                                    <i class="fa fa-trash"></i> clear complete local storage
+                                </button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                <div class="panel-body">
+                    <ul class="list-group">
+                        <li class="list-group-item cursor-pointer" ng-repeat="item in localStorage track by $index"
+                            ng-click="showLocalStorageItem(item)">
+                            <span ng-bind="item.key + '&nbsp;'"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-9">
+            <div class="panel panel-default" ng-if="localStorageItem" id="local-storage">
+                <div class="panel-heading trans-background">
+                    [[localStorageItem.key]]&nbsp;<span class="pull-right" style="position: relative;top: -7px;">
+                    <button class="btn btn-xs no-padding" ng-click="clearLocalStorageItem(localStorageItem.key)"><i
+                            class="fa fa-trash"></i> delete this data
+                    </button>
+                </span>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-xs-12 col-md-9">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="control-label col-xs-2">Daten</label>
+
+                                    <div class="col-xs-9">
+                                        <div json-viewer="localStorageItem.value"></div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/ng-template" id="modalLocalStorage.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Daten löschen</h3>
+        </div>
+        <div class="modal-body">
+            <p>Sollen wirklich alle Daten zum Board gelöscht werden?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="ok()">Ja</button>
+            <button class="btn btn-warning" type="button" ng-click="cancel()">Nein</button>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="modalLocalStorageItem.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Daten löschen</h3>
+        </div>
+        <div class="modal-body">
+            <p>Sollen wirklich der Datensatz "[[ item ]]" gelöscht werden?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="ok()">Ja</button>
+            <button class="btn btn-warning" type="button" ng-click="cancel()">Nein</button>
+        </div>
+    </script>
+</div>

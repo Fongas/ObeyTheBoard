@@ -4,7 +4,7 @@ $ = jQuery;
  * Created by torstenzwoch on 30.05.14.
  */
 /* AngularJS - change standard placeholder */
-var module = angular.module('github', ['ngSanitize', 'LocalStorageModule', 'nl2br', 'angularLocalStorage', 'angular-sortable-view', 'ngRoute', 'ngAnimate', 'isteven-multi-select', 'ui.bootstrap', 'chart.js', 'angular-growl', 'firebase']);
+var module = angular.module('github', ['ngSanitize', 'LocalStorageModule', 'nl2br', 'angularLocalStorage', 'angular-sortable-view', 'ngRoute', 'ngAnimate', 'isteven-multi-select', 'ui.bootstrap', 'chart.js', 'angular-growl','jsonFormatter','platypus.jsonviewer']);//, 'firebase'
 module.config(['$interpolateProvider', '$compileProvider', 'localStorageServiceProvider', function ($interpolateProvider, $compileProvider, localStorageServiceProvider) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
@@ -28,6 +28,9 @@ module.config(['$routeProvider', function ($routeProvider) {
     }).when('/user', {
         templateUrl: 'user.html',
         controller: 'UserCtrl'
+    }).when('/localstorage', {
+        templateUrl: 'localstorage.html',
+        controller: 'LocalStorageCtrl'
     }).otherwise({redirectTo: '/'});
 }]);
 angular.module('github').config(function ($controllerProvider) {
@@ -89,7 +92,7 @@ module.filter('issueAssigneeFilter', function () {
     };
 });
 
-var MainCtrl = function MainCtrl($scope, $timeout, $http, $location, growl, $firebaseArray) {
+var MainCtrl = function MainCtrl($scope, $timeout, $http, $location, growl) { //, $firebaseArray
     $scope.repositories = [];
     $scope.users = [];
 
@@ -115,6 +118,7 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location, growl, $fir
     $scope.showSelect = true;
     $scope.timeline = {"dates": [], "open": [], "closed": []};
     $scope.connectionFailedAlreadyShown = false;
+    $scope.lastSyncDate = null;
     $scope.defaultBoardLabels = [
         {
             "name": "BOARD: BACKLOG",
@@ -198,18 +202,18 @@ var MainCtrl = function MainCtrl($scope, $timeout, $http, $location, growl, $fir
 
 
 $scope.fongas = null;
-    var ref = new Firebase("https://fongas.firebaseio.com/messages");
+    ////var ref = new Firebase("https://fongas.firebaseio.com/messages");
     // download the data into a local object
-    $scope.messages = $firebaseArray(ref);
+    ////$scope.messages = $firebaseArray(ref);
     // synchronize the object with a three-way data binding
     // click on `index.html` above to see it used in the DOM!
     //syncObject.$bindTo($scope, "fongas");
 
-    $scope.addMessage = function() {
-        $scope.messages.$add({
-            text: "test"
-        });
-    };
+    ////$scope.addMessage = function() {
+    ////    $scope.messages.$add({
+    ////        text: "test"
+    ////    });
+    ////};
 
     $scope.chart = {};
     $scope.chart.doughnut = {
@@ -249,6 +253,7 @@ $scope.fongas = null;
     $scope.$watch('boards', function (newValue, oldValue) {
         if ($scope.boards !== undefined) {
             localStorage.setItem("fongas.boards", JSON.stringify($scope.boards));
+            localStorage.setItem("fongas.boards.lastModify", JSON.stringify(new moment()));
         }
     });
 
@@ -410,6 +415,9 @@ $scope.fongas = null;
                             $scope.availableRepoStates[index][indexCol] = tmpAvailableRepoStates;
                         });
                     });
+
+                    localStorage.setItem("fongas.tags.lastSync", JSON.stringify(new moment()));
+
                     $timeout(function () {
                         $scope.loadIssues();
                     }, 100);
@@ -421,6 +429,7 @@ $scope.fongas = null;
                 }
             });
         });
+
 
     };
 
@@ -652,6 +661,7 @@ $scope.fongas = null;
                     });
 
 
+                    localStorage.setItem("fongas.issues.lastSync", JSON.stringify(new moment()));
                     $scope.timeline.all = [];
 
 
@@ -724,6 +734,8 @@ $scope.fongas = null;
                         $scope.assignee = assignee[0];
                     }
                 }
+
+
             });
         });
         var scope = angular.element($('#BoardCtrl')).scope();
@@ -751,6 +763,7 @@ $scope.fongas = null;
 
     $scope.refreshTickets = function (assignee) {
         localStorage.setItem("fongas.assignee", JSON.stringify(assignee));
+        localStorage.setItem("fongas.assignee.lastSync", JSON.stringify(new moment()));
         //$timeout(function () {
         //    $scope.$apply(function () {
         $scope.showSelect = false;
@@ -800,6 +813,7 @@ $scope.fongas = null;
                     }
                     $scope.users[repoIndex].repos = response;
                     localStorage.setItem("fongas.users", JSON.stringify($scope.users));
+                    localStorage.setItem("fongas.users.lastSync", JSON.stringify(new moment()));
                 });
             });
         });
@@ -865,5 +879,5 @@ $scope.fongas = null;
         });
     };
 };
-MainCtrl.$inject = ['$scope', '$timeout', '$http', '$location', 'growl','$firebaseArray'];
+MainCtrl.$inject = ['$scope', '$timeout', '$http', '$location', 'growl']; //,'$firebaseArray'
 module.controller('MainCtrl', MainCtrl);

@@ -381,6 +381,7 @@ position: relative;
 
 .form-horizontal .control-label{
     padding-top: 7px;
+    padding-left: 20px;
 }
 
 .cursor-pointer{
@@ -399,4 +400,12 @@ position: relative;
 
 .no-margin{
     margin: 0px;
+}
+
+[json-viewer] {
+padding-top: 7px;
+}
+
+[json-viewer] .json-viewer--number{
+    color: #2F84B1;
 }

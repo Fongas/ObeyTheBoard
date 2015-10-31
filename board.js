@@ -1,4 +1,4 @@
-var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
+var BoardCtrl = function BoardCtrl($scope, $timeout, $http, growl) {
 
     $scope.settingsOn = false;
     $scope.newIssuesOn = false;
@@ -6,7 +6,6 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
 
     $scope.localLang = {
         selectAll: "Tick all",
-        selectNone: "Tick none",
         reset: "Undo all",
         search: "Suche...",
         nothingSelected: "Filter hinzufügen"         //default-label is deprecated and replaced with this.
@@ -70,6 +69,7 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
             $scope.boards[boardIndex].columns[colIndex].tags = $scope.boards[boardIndex].columns[colIndex].selectedTags;
             $scope.boards[boardIndex].columns[colIndex].states = $scope.boards[boardIndex].columns[colIndex].selectedStates;
             localStorage.setItem("fongas.boards", JSON.stringify($scope.boards));
+            localStorage.setItem("fongas.boards.lastSync", JSON.stringify(new moment()));
         }
     };
 
@@ -158,6 +158,7 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
                 //delete the created from list
                 return response;
             }, function () {
+
                 return null;
             });
         });
@@ -297,7 +298,10 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
             $scope.$parent.users = JSON.parse(users);
             //$scope.users = JSON.parse(users);
         } else {
+            /* MUST THIS HAPPEN?
             localStorage.setItem("fongas.users", JSON.stringify($scope.users));
+            localStorage.setItem("fongas.users.lastSync", JSON.stringify(new moment()));
+            */
         }
 
         // enrich the user object with user data and repos from github etc.
@@ -310,7 +314,10 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
             $scope.$parent.repos = JSON.parse(repo);
             //$scope.repos = JSON.parse(repo);
         } else {
+            /* MUST THIS HAPPEN?
             localStorage.setItem("fongas.repos", JSON.stringify($scope.repos));
+            localStorage.setItem("fongas.repos.lastSync", JSON.stringify(new moment()));
+            */
         }
 
         // read board with columns from local storage
@@ -338,7 +345,7 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http) {
 };
 
 
-BoardCtrl.$inject = ['$scope', '$timeout', '$http'];
+BoardCtrl.$inject = ['$scope', '$timeout', '$http','growl'];
 module.controller('BoardCtrl', BoardCtrl);
 
 

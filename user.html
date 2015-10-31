@@ -1,8 +1,14 @@
 <div class="widget-body" ng-controller="UserCtrl" id="UserCtrl">
     <div class="row">
-        <div class="col-md-12">
-            <button type="button" ng-click="go('/board');" class="btn btn-default"><i class="fa fa-columns"></i> Board</button>
-            <button type="button" ng-click="go('/user');" class="btn btn-default btn-active"><i class="fa fa-cogs"></i> User Settings</button>
+        <div class="col-md-6">
+            <button type="button" ng-click="go('/board');" class="btn btn-default"><i class="fa fa-columns"></i> Board
+            </button>
+            <button type="button" ng-click="go('/user');" class="btn btn-default btn-active"><i class="fa fa-cogs"></i>
+                User Settings
+            </button>
+            <button type="button" ng-click="go('/localstorage');" class="btn btn-default"><i class="fa fa-database"></i>
+                Local Storage
+            </button>
         </div>
     </div>
     <div class="space-24"></div>
@@ -32,10 +38,10 @@
             </div>
         </div>
         <div class="col-xs-12 col-md-9">
-            <div class="panel panel-default" ng-if="currentUser.type !== undefined" id="user-detail">
+            <div class="panel panel-default" ng-if="userDetailOn" id="user-detail">
                 <div class="panel-heading trans-background">
                     [[currentUser.user.login]]&nbsp;<span class="pull-right">
-                    <button class="btn btn-xs no-padding" ng-click="deleteUser(currentUser)">delete</button>
+                    <button class="btn btn-xs no-padding" ng-click="deleteUser(currentUser)"><i class="fa fa-trash"></i> delete</button>
                 </span>
                 </div>
                 <div class="panel-body">
@@ -92,7 +98,8 @@
                             <div class="panel-heading trans-background ng-binding">Repositories
                                 ([[currentUser.repos.length]])
                                 <span class="pull-right">
-                                    <button class="btn btn-xs no-padding" ng-click="refreshRepositories()">refresh</button>
+                                    <button class="btn btn-xs no-padding" ng-click="refreshRepositories()"><i class="fa fa-refresh"></i> refresh
+                                    </button>
                                 </span>
                             </div>
                             <div class="row">
@@ -122,7 +129,31 @@
             <p>Sollen die folgenden Standardlabels in dem Projekt angelegt werden?</p>
             <ul>
                 <li ng-repeat="item in items">
-                     <p style="width: 250px;">[[ item.name ]] <span ng-hide="item.exist" style="float:right;color:red;padding-left: 5px;">(noch nicht angelegt)</span><span ng-show="item.exist" style="float:right;color:green;padding-left: 5px;">(bereits angelegt)</span></p>
+                    <p style="width: 250px;">[[ item.name ]] <span ng-hide="item.exist"
+                                                                   style="float:right;color:red;padding-left: 5px;">(noch nicht angelegt)</span><span
+                            ng-show="item.exist"
+                            style="float:right;color:green;padding-left: 5px;">(bereits angelegt)</span></p>
+                </li>
+            </ul>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="ok()">Ja</button>
+            <button class="btn btn-warning" type="button" ng-click="cancel()">Nein</button>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="modal.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Daten löschen</h3>
+        </div>
+        <div class="modal-body">
+            <p>Sollen wirklich alle Daten zum Board gelöscht werden?</p>
+            <ul>
+                <li ng-repeat="item in items">
+                    <p style="width: 250px;">[[ item.name ]] <span ng-hide="item.exist"
+                                                                   style="float:right;color:red;padding-left: 5px;">(noch nicht angelegt)</span><span
+                            ng-show="item.exist"
+                            style="float:right;color:green;padding-left: 5px;">(bereits angelegt)</span></p>
                 </li>
             </ul>
         </div>
