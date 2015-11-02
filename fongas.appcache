@@ -4,17 +4,18 @@ CACHE MANIFEST
 # Explicitly cached 'master entries'.
 CACHE:
 #/favicon.ico
-index.html
-app.html
-app.css
-board.html
-board.js
-board.css
-user.html
-user.js
-localstorage.html
-localstorage.js
-src/img/bg2.jpg
+/
+/index.html
+/app.html
+/app.css
+/board.html
+/board.js
+/board.css
+/user.html
+/user.js
+/localstorage.html
+/localstorage.js
+/src/img/bg2.jpg
 #bower_components/*
 
 # Resources that require the user to be online.
