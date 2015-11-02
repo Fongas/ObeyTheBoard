@@ -243,7 +243,13 @@ var BoardCtrl = function BoardCtrl($scope, $timeout, $http, growl, $modal) {
                     });
                 });
             }, function () {
-                // keine Aktion durchführen
+                /* undo movement */
+                // copy moved element to source column
+                $partFrom.splice($indexFrom, 0, $scope.boards[$indexBoard].columns[targetColumn].issues[$indexTo]);
+                $partFrom.join();
+                //remove dropped element from destination column
+                $partTo.splice($indexTo, 1);
+                $partTo.join();
             });
         },0);
     };
