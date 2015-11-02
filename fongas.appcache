@@ -1,11 +1,11 @@
 CACHE MANIFEST
-# 2015-11-02:v1
+# 2015-11-02:v4
 
 # Explicitly cached 'master entries'.
 CACHE:
 #/favicon.ico
 index.html
-app.html
+app.js
 app.css
 board.html
 board.js
@@ -14,8 +14,37 @@ user.html
 user.js
 localstorage.html
 localstorage.js
-src/img/bg2.jpg
-#bower_components/*
+src/img/bg.png
+bower_components/bootstrap/dist/css/bootstrap.min.css
+bower_components/components-font-awesome/css/font-awesome.min.css
+bower_components/isteven-angular-multiselect/isteven-multi-select.css
+bower_components/angular-chart.js/dist/angular-chart.css
+bower_components/angular-growl-v2/build/angular-growl.min.css
+bower_components/json-formatter/dist/json-formatter.min.css
+bower_components/json-viewer/json-viewer.css
+bower_components/jquery/dist/jquery.min.js
+bower_components/bootstrap/dist/js/bootstrap.min.js
+bower_components/angular/angular.min.js
+bower_components/angular-route/angular-route.min.js
+bower_components/angular-sanitize/angular-sanitize.min.js
+bower_components/angular-nl2br/angular-nl2br.min.js
+bower_components/angular-cookies/angular-cookies.min.js
+bower_components/angular-local-storage/dist/angular-local-storage.min.js
+bower_components/angularLocalStorage/src/angularLocalStorage.js
+bower_components/angular-sortable-view/src/angular-sortable-view.min.js
+bower_components/angular-animate/angular-animate.min.js
+bower_components/isteven-angular-multiselect/isteven-multi-select.js
+bower_components/angular-ui-select3/src/select3.js
+bower_components/select2/select2.min.js
+bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js
+bower_components/Chart.js/Chart.min.js
+bower_components/angular-chart.js/dist/angular-chart.js
+bower_components/moment/min/moment.min.js
+bower_components/moment-timezone/builds/moment-timezone.min.js
+bower_components/angular-growl-v2/build/angular-growl.min.js
+bower_components/json-formatter/dist/json-formatter.min.js
+bower_components/json-viewer/json-viewer.js
+bower_components/components-font-awesome/fonts/fontawesome-webfont.woff2?v=4.3.0
 
 # Resources that require the user to be online.
 NETWORK:
